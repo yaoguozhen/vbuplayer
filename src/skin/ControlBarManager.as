@@ -1,0 +1,637 @@
+package skin 
+{
+	import flash.display.MovieClip;
+	import flash.display.Sprite;
+	import flash.display.Stage;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.geom.Point;
+	import flash.text.TextField;
+	import flash.utils.Timer;
+	import flash.system.Capabilities;
+	import com.greensock.*;
+	import com.greensock.easing.*;
+	import data.Data;
+	import skin.events.ProgressChangeEvent;
+	import skin.events.RateEvent;
+	import skin.events.VolChangeEvent;
+	
+	/**
+	 * ...
+	 * @author yaoguozhen
+	 */
+	public class ControlBarManager extends EventDispatcher 
+	{
+		private var _controlBar:MovieClip;
+		private var _progressBar:YaoSlider;
+		private var _volBar:YaoSlider;
+		private var _hideControlBarTime:Timer;
+		
+		private var _isShow:Boolean = true;
+		private var _stage:Stage;
+		private var _screenClickHot:Sprite;
+		private var _bigPlayBtn:MovieClip;
+		private var _buffering:MovieClip;
+		private var _alertMsg:MovieClip;
+		private var _adMsg:MovieClip;
+		private var _bg:MovieClip;
+		private var _ratePanel:MovieClip;
+		private var _alertMsgBg:MovieClip;
+
+		private var _currentRate:String="biaozhun";
+		
+		private var _volNumBeforeClear:Number;
+		
+		private var _isFullScreen:Boolean = false;
+		public var bigPlayBtnType:String=""//resume 被当做恢复播放按钮。connect被当做开始连接按钮
+		
+		public function ControlBarManager() :void
+		{
+				
+		}
+		private function initTimer():void
+		{
+			_hideControlBarTime = new Timer(3000, 1);
+			_hideControlBarTime.addEventListener(TimerEvent.TIMER, timerHandler);
+		}
+		private function timerHandler(evn:TimerEvent):void
+		{
+			if (_isShow)
+			{
+				hide();
+			}
+		}
+		private function init(s:Skin):void
+		{
+			_screenClickHot = s.screenClickHot;
+			_bigPlayBtn = s.bigPlayBtn;
+			_buffering = s.buffering;
+			_bg = s.bg;
+			_alertMsgBg = s.alertMsgBg;
+			_ratePanel = s.ratePanel;
+			_alertMsg = s.alertMsg;
+			_adMsg = s.adMsg;
+			_controlBar = s.controlBar;
+			_stage = _controlBar.stage;
+			
+			_adMsg.txt.autoSize = "left";
+			
+			_controlBar.playBtn.visible = true;
+			_controlBar.playBtn.buttonMode = true;
+			_controlBar.pauseBtn.visible = false;
+			_controlBar.pauseBtn.buttonMode = true;
+			_controlBar.fullscreenBtn.stop();
+			_controlBar.fullscreenBtn.buttonMode = true;
+			//_bg.visible=false
+			
+			_controlBar.progressBar.followBar.width = 0;
+			_controlBar.progressBar.loadingBar.width = 0;
+			
+			_stage.addEventListener(MouseEvent.MOUSE_MOVE, stageMouseMoveHandler123);
+			
+			_controlBar.volBtn.stop();
+			_controlBar.volBtn.buttonMode = true;
+			_controlBar.volBtn.addEventListener(MouseEvent.CLICK, volBtnClickHandler);
+			
+			_volBar = new YaoSlider();
+			_volBar.init(_controlBar.volBar, 0, 1, true, true);
+			_volBar.currentPercent = 1;
+			_volBar.addEventListener(YaoSlider.CHANGE, volBarChangeHandler);
+			//_volBar.addEventListener(YaoSlider.BLOCK_RELEASED, volBarReleasedHandler);
+			
+			_controlBar.fullscreenBtn.addEventListener(MouseEvent.CLICK, fullscreenBtnClickHandler);
+			_controlBar.playBtn.addEventListener(MouseEvent.CLICK, playBtnClickHandler);
+			_controlBar.pauseBtn.addEventListener(MouseEvent.CLICK, pauseBtnClickHandler);
+			
+			
+			_controlBar.progressBar.loadingBar.width = 0;
+			_controlBar.progressBar.followBar.width = 0;
+			
+			_progressBar = new YaoSlider();
+			_progressBar.init(_controlBar.progressBar, 0, 1, false, true);
+			_progressBar.active = -1;
+			_progressBar.currentPercent = 0;
+			
+			_progressBar.addEventListener(YaoSlider.CHANGE, progressBarChangeHandler);
+			_progressBar.addEventListener(YaoSlider.BLOCK_PRESSED, progressBarPressedHandler);
+			_progressBar.addEventListener(YaoSlider.BLOCK_RELEASED, progressBarReleasedHandler);
+			//_progressBar.addEventListener(YaoSlider.PASS_CLICKED, passClickedHandler);
+			
+			_screenClickHot.addEventListener(MouseEvent.CLICK, screenClickHotClickHandler);
+			_screenClickHot.addEventListener(MouseEvent.DOUBLE_CLICK, screenClickHotDoubleClickHandler);
+			
+			_ratePanel.visible = false;
+			activeRatePanelItem(_ratePanel.liuchang, false);
+			activeRatePanelItem(_ratePanel.biaozhun, false);
+			activeRatePanelItem(_ratePanel.gaoqing, false);
+			
+			if (Data.live)
+			{
+				_controlBar.rateBtn.visible = false;
+				_controlBar.playBtn.visible = false;
+				_controlBar.pauseBtn.visible = false;
+				_screenClickHot.visible = false;
+			}
+			else
+			{
+				_controlBar.rateBtn.rate.text = "标准";
+				_controlBar.rateBtn.mouseChildren = false;
+				rateBtnEnabled = false;
+			}
+			
+			if (Data.live)
+			{
+				_bigPlayBtn.visible = false;
+				bigPlayBtnType = "resume";
+			}
+			else
+			{
+				if (Data.autoPlay)
+				{
+					_bigPlayBtn.visible = false;
+					bigPlayBtnType = "resume";
+				}
+				else
+				{
+					bigPlayBtnType = "connect";
+				}
+			}
+			_bigPlayBtn.buttonMode = true;
+			_bigPlayBtn.addEventListener(MouseEvent.CLICK, bigPlayBtnClickHandler);
+			
+			_buffering.visible = false;
+			
+			if (Data.live)
+			{
+				_controlBar.progressBar.visible = false;
+				_controlBar.time.visible = false;
+			}
+
+			recordInitNumber();
+		}
+		private function recordInitNumber():void
+		{
+			record(_controlBar.controlBarBg);
+			record(_controlBar.playBtn);
+			record(_controlBar.pauseBtn);
+			record(_controlBar.fullscreenBtn);
+			record(_controlBar.volBtn);
+			record(_controlBar.volBar);
+			record(_controlBar.time);
+			record(_controlBar.progressBar);
+			record(_controlBar.rateBtn);
+			record(_ratePanel);
+		}
+		private function record(mc:MovieClip):void
+		{
+			mc.initX = mc.x;
+			mc.initY = mc.y;
+			mc.disRight = _controlBar.width - mc.x;
+		}
+		private function rateBtnClickHandler(evn:MouseEvent):void
+		{
+			_ratePanel.visible=!_ratePanel.visible
+		}
+		private function stageMouseMoveHandler123(evn:MouseEvent):void
+		{
+			if (_isFullScreen)
+			{
+				_hideControlBarTime.reset();
+				_hideControlBarTime.start();
+				if (!_isShow)
+				{
+					show();
+				}
+			}
+		}
+		private function playBtnClickHandler(evn:MouseEvent):void
+		{
+			dispatchEvent(new Event("playBtnClick"));
+		}
+		private function pauseBtnClickHandler(evn:MouseEvent):void
+		{
+			dispatchEvent(new Event("pauseBtnClick"));
+		}
+		private function fullscreenBtnClickHandler(evn:MouseEvent):void
+		{
+			dispatchEvent(new Event("fullscreenBtnClick"));
+		}
+		private function progressBarChangeHandler(evn:Event):void
+		{
+			var event:ProgressChangeEvent = new ProgressChangeEvent(ProgressChangeEvent.CHANGE);
+			event.per = _progressBar.currentPercent;
+			dispatchEvent(event);
+		}
+		private function progressBarPressedHandler(evn:Event):void
+		{
+			dispatchEvent(new Event("progressBarBlockPressed"))
+		}
+		private function progressBarReleasedHandler(evn:Event):void
+		{
+			dispatchEvent(new Event("progressBarBlockReleased"))
+		}
+		private function screenClickHotClickHandler(evn:Event):void
+		{
+			dispatchEvent(new Event("screenClickHotClick"));
+		}
+		private function screenClickHotDoubleClickHandler(evn:Event):void
+		{
+			//dispatchEvent(new Event("screenClickHotDoubleClick"));
+		}
+		private function bigPlayBtnClickHandler(evn:Event)
+		{
+			_bigPlayBtn.visible = false;
+			dispatchEvent(new Event("bigPlayBtnClick"));
+		}
+		private function passClickedHandler(evn:Event):void
+		{
+			dispatchEvent(new Event("passClicked"))
+		}
+		private function pathClickHandler(evn:MouseEvent):void
+		{
+			if ((_controlBar.progressBar.path.mouseX / _controlBar.progressBar.width) < _controlBar.progressBar.loadingBar.scaleX)
+			{
+				_progressBar.currentPercent = _controlBar.progressBar.path.mouseX / _controlBar.progressBar.width;
+				dispatchEvent(new Event("progressBarChange"));
+			}
+		}
+		private function volBtnClickHandler(evn:MouseEvent):void
+		{
+			if (_controlBar.volBtn.currentFrame == 1)
+			{
+				_volNumBeforeClear = _volBar.currentPercent;
+				
+				_controlBar.volBtn.gotoAndStop(2);
+				_volBar.currentPercent = 0;
+				
+				var event:VolChangeEvent = new VolChangeEvent(VolChangeEvent.CHANGE);
+				event.vol = _volBar.currentPercent;
+				dispatchEvent(event);
+			}
+			else
+			{
+				_controlBar.volBtn.gotoAndStop(1);
+				_volBar.currentPercent = _volNumBeforeClear;
+				
+				var event:VolChangeEvent = new VolChangeEvent(VolChangeEvent.CHANGE);
+				event.vol = _volBar.currentPercent;
+				dispatchEvent(event);
+			}
+		}
+		private function volBarChangeHandler(evn:Event):void
+		{
+			_controlBar.volBtn.gotoAndStop(1);
+			
+			var event:VolChangeEvent = new VolChangeEvent(VolChangeEvent.CHANGE);
+			event.vol = _volBar.currentPercent;
+			dispatchEvent(event);
+		}
+		private function show(immediately:Boolean=false):void
+		{
+				_isShow = true;
+				TweenLite.killTweensOf(_controlBar);
+				var targetPosition:Number = _stage.stageHeight - _controlBar.height;
+				if (immediately)
+				{
+					_controlBar.y =targetPosition;
+				}
+				else
+				{
+					TweenLite.to(_controlBar, 0.5, { y:targetPosition, ease:Circ.easeOut } );
+				}
+		}
+		private function hide(immediately:Boolean=false):void
+		{
+			_isShow = false;
+			TweenLite.killTweensOf(_controlBar);
+			var targetPosition:Number = _stage.stageHeight;
+			if (immediately)
+			{
+				_controlBar.y = targetPosition;
+			}
+			else
+			{
+				TweenLite.to(_controlBar, 0.5, { y:targetPosition, ease:Circ.easeOut } );
+			}
+		}
+		private function activeRatePanelItem(item:MovieClip,b:Boolean):void
+		{
+			item.rate.mouseEnabled = false;
+			if (b)
+			{
+				item.rate.textColor = 0xffffff;
+				item.btn.visible = true;
+				item.addEventListener(MouseEvent.CLICK, itemClickHandler);
+			}
+			else
+			{
+				item.rate.textColor = 0x999999;
+				item.btn.visible = false;
+				item.removeEventListener(MouseEvent.CLICK, itemClickHandler);
+			}
+		}
+		private function itemClickHandler(evn:MouseEvent):void
+		{
+			var item:MovieClip = MovieClip(evn.currentTarget);
+			if (_currentRate != item.name)
+			{
+				_currentRate = item.name;
+				_controlBar.rateBtn.rate.text = item.rate.text;
+
+				var event:RateEvent = new RateEvent(RateEvent.RATE_CHANGE);
+				event.rate = _currentRate;
+				dispatchEvent(event);
+			}
+			_ratePanel.visible = false;
+		}
+		private function _setVideoStatus(status:String):void
+		{
+			switch(status)
+			{
+				case Data.PLAY:
+					if (!Data.live)
+					{
+						_controlBar.playBtn.visible = false;
+						_controlBar.pauseBtn.visible = true;
+						_bigPlayBtn.visible = false;
+					}
+					break;
+				case Data.PAUSE:
+					if (!Data.live)
+					{
+						_controlBar.playBtn.visible = true;
+						_controlBar.pauseBtn.visible = false;
+						_bigPlayBtn.visible = true;
+					}
+					break;
+				case Data.COMPLETE:
+				case Data.UN_PUBLISH:
+				case Data.CLOSED:
+					if (!Data.live)
+					{
+						_controlBar.playBtn.visible = true;
+						_controlBar.pauseBtn.visible = false;
+						_progressBar.currentPercent = 0;
+					}
+					//因为点播播放完毕后不需要重播，所以这里注释掉了
+					if (status == Data.CLOSED)
+					{
+						_bigPlayBtn.visible = true;
+					}
+					break;
+			}
+		}
+		private function _initRate():void
+		{
+			var n:uint = Data.streams.length;
+			for (var i:uint = 0; i < n; i++)
+			{
+				switch(Data.streams[i][1])
+				{
+					case "liuchang":
+						activeRatePanelItem(_ratePanel.liuchang,true);
+						break;
+					case "biaozhun":
+						activeRatePanelItem(_ratePanel.biaozhun,true);
+						break;
+					case "gaoqing":
+						activeRatePanelItem(_ratePanel.gaoqing,true);
+						break;
+				}
+			}
+		}
+		private function _setCurrentRate(rate:String):void
+		{
+			switch(rate)
+			{
+				case "liuchang":
+					_controlBar.rateBtn.rate.text = "流畅";
+					break;
+				case "biaozhun":
+					_controlBar.rateBtn.rate.text = "标准";
+					break;
+				case "gaoqing":
+					_controlBar.rateBtn.rate.text = "高清";
+					break;
+			}
+			_currentRate = rate;
+		}
+		private function _scale():void
+		{
+			_controlBar.y = _stage.stageHeight - _controlBar.height;
+			//控制条背景,右侧总是差一个像素对不起，不知道为什么，所以这里就多加了一个像素
+			_controlBar.controlBarBg.width = _stage.stageWidth+1;
+			_controlBar.volBtn.x = _controlBar.controlBarBg.width - _controlBar.volBtn.disRight;
+			_controlBar.volBar.x = _controlBar.controlBarBg.width - _controlBar.volBar.disRight;
+			_controlBar.fullscreenBtn.x = _controlBar.controlBarBg.width - _controlBar.fullscreenBtn.disRight;			
+			
+			_screenClickHot.width = _controlBar.controlBarBg.width;
+			_screenClickHot.height = _stage.stageHeight - _controlBar.controlBarBg.height;
+			_bigPlayBtn.x = (_stage.stageWidth-_bigPlayBtn.width) / 2;
+			_bigPlayBtn.y = (_stage.stageHeight-_bigPlayBtn.height) / 2;
+			_buffering.x = _stage.stageWidth / 2;
+			_buffering.y = _stage.stageHeight / 2;
+			
+			_bg.x = 0;
+			_bg.y = 0;
+			_bg.width = _stage.stageWidth;
+			_bg.height = _stage.stageHeight - _controlBar.controlBarBg.height;
+			_controlBar.rateBtn.x = _controlBar.controlBarBg.width - _controlBar.rateBtn.disRight;
+			
+			_controlBar.progressBar.progressBarBg2.width = _controlBar.rateBtn.x - _controlBar.progressBar.x - 10;
+			_controlBar.progressBar.progressBarBg.width = _controlBar.progressBar.progressBarBg2.width-10;
+			/*
+			    下面如果直接写
+			        path.width=XXXXXXXX
+				则
+				    path.mouseX属性不准确
+			*/
+			_controlBar.progressBar.path.getChildAt(0).width = _controlBar.progressBar.progressBarBg.width;
+
+			_ratePanel.x = _stage.stageWidth - _ratePanel.disRight;
+			_ratePanel.y = _controlBar.y - _ratePanel.height;
+			
+			_adMsg.x = (_stage.stageWidth - _adMsg.width) / 2;
+			_adMsg.y = 10;
+			
+			_alertMsgBg.x = 0;
+			_alertMsgBg.y = _controlBar.y - _alertMsgBg.height;
+			_alertMsgBg.width = _stage.stageWidth;
+			_alertMsg.x = 10;
+			_alertMsg.y = _stage.stageHeight - _controlBar.controlBarBg.height - _alertMsg.height - 3;
+		}
+		private function _setTime(currentTime:Number, totalTime:Number):void
+		{
+			_controlBar.time.txt.text = MyDate.getFormatTime(totalTime, true) + " / " +MyDate.getFormatTime(currentTime, true) ;
+		    if (totalTime > 0)
+			{
+				_progressBar.currentPercent = currentTime / totalTime;
+			}
+		}
+		private function _unActiveRatePanelItem(rate:String):void
+		{
+			switch(rate)
+			{
+				case "liuchang":
+					activeRatePanelItem(_ratePanel.liuchang, false);
+					break;
+				case "biaozhun":
+					activeRatePanelItem(_ratePanel.biaozhun, false);
+					break;
+				case "gaoqing":
+					activeRatePanelItem(_ratePanel.gaoqing, false);
+					break;
+			}
+		}
+		
+		public function add(skin:Skin):void
+		{
+			initTimer();
+			init(skin);
+		}
+		//设置时间信息
+		public function setTime(currentTime:Number,totalTime:Number):void
+		{
+			_setTime(currentTime, totalTime);
+		}
+		//设置缓冲
+		public function setBuffering(show:Boolean,msg:String=""):void
+		{
+			_buffering.label.text = msg;
+			_buffering.visible = show;
+		}
+		//初始化码率按钮
+		public function initRate():void
+		{
+			_initRate();
+		}
+		//动态调整元件
+		public function scale():void
+		{
+			_scale();
+		}
+		//设置当前码率
+		public function setCurrentRate(rate:String):void
+		{
+			_setCurrentRate(rate);
+		}
+		//隐藏码率面板
+		public function hideRatePanel():void
+		{
+			_ratePanel.visible = false;
+		}
+		//禁用码率面板按钮
+		public function unActiveRatePanelItem(rate:String):void
+		{
+			_unActiveRatePanelItem(rate);
+		}
+		//是否全屏
+		public function get isFullScreen():Boolean
+		{
+			return _isFullScreen;
+		}
+	    public function set isFullScreen(b:Boolean):void
+		{
+			_isFullScreen = b;
+			if (b)
+			{
+				TweenLite.killTweensOf(_controlBar);
+				_hideControlBarTime.start();
+				_controlBar.fullscreenBtn.gotoAndStop(2);
+			}
+			else
+			{
+				TweenLite.killTweensOf(_controlBar);
+				_hideControlBarTime.reset();
+				show(true);
+				_controlBar.fullscreenBtn.gotoAndStop(1);
+			}
+		}
+		//设置播放按钮是否可用
+		public function set playBtnEnabled(b:Boolean):void
+		{
+			if (b)
+			{
+				_controlBar.playBtn.addEventListener(MouseEvent.CLICK, playBtnClickHandler);
+			}
+			else
+			{
+				_controlBar.playBtn.removeEventListener(MouseEvent.CLICK, playBtnClickHandler);
+			}
+				
+			_controlBar.playBtn.buttonMode = b;
+		}
+		//是否激活进度条
+		public function set progressBarActive(n:Number):void
+		{
+			_progressBar.active = n;
+		}
+		//设置播放状态
+		public function set setVideoStatus(status:String):void
+		{
+			_setVideoStatus(status);
+		}
+		//设置下载进度
+		public function set loadPer(n:Number):void
+		{
+			_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*n;
+		}
+		//设置播放进度
+		public function set playPer(n:Number):void
+		{
+			_progressBar.currentPercent = n;
+		}
+		//进度条当前值
+		public function get progressBarCurrentPercent():Number
+		{
+			return _progressBar.currentPercent;
+		}
+		//进度条滑块是不是被按下了
+		public function get progressBarBlockPressed():Boolean
+		{
+			return _progressBar.blockPressed;
+		}
+		//警告信息
+		public function set alertMsg(msg:String):void
+		{
+			_alertMsg.txt.text = msg;
+			if (msg == "")
+			{
+				_alertMsgBg.visible = false;
+			}
+			else
+			{
+				_alertMsgBg.visible = true;
+			}
+		}
+		public function set adMsg(msg:String):void
+		{
+			_adMsg.txt.text = msg;
+			_adMsg.x = (_stage.stageWidth - _adMsg.width) / 2;
+		}
+		//当前码率
+		public function get currentRate():String
+		{
+			return _currentRate;
+		}
+		//切换码率按钮是否可用
+		public function set rateBtnEnabled(b:Boolean):void
+		{
+			_controlBar.rateBtn.buttonMode = b;
+			if (b)
+			{
+				_controlBar.rateBtn.addEventListener(MouseEvent.CLICK, rateBtnClickHandler);
+				_controlBar.rateBtn.rate.textColor = 0x4a4a4a;
+			}
+			else
+			{
+				_controlBar.rateBtn.removeEventListener(MouseEvent.CLICK, rateBtnClickHandler);
+				_ratePanel.visible = false;
+				_controlBar.rateBtn.rate.textColor = 0xcccccc;
+			}
+		}
+	}
+
+}

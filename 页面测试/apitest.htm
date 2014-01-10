@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script type="text/javascript">
+        function invokeApi() {
+            var http = window.XMLHttpRequest ?
+                        new XMLHttpRequest() :
+                        new ActiveXObject('Microsoft.XMLHTTP');
+            http.open('POST', 'http://115.28.6.41/VideoControl/library/VideoLibrary.php', false);
+            http.setRequestHeader('Content-Type', 'text/plain; charset=gb2312');
+            var methodName = "getVideoInfo";
+            var appId = "88668301940490240";
+            var appKey = "88668301d940490240";
+            var videoId = "92905205036745986"; //92905205036745986、92905205036746242 、92905205036747266
+            //content格式固定，只须替换videoId即可
+            var content = '[{\"appid\":\"' + appId + '\",\"appkey\":\"' + appKey + '\",\"method\":\"' + methodName + '\",\"param\":[{ \"VideoId\" : \"' + videoId + '\"}]}]';
+			var m='[{"appid":"88668301940490240","appkey":"88668301940490240","method":"getVideoInfo","param":[{ "VideoId" : "92905205036745986"}]}]';
+            http.send(m);
+            if (http.status != 200)
+                throw { message: http.status + ' ' + http.statusText, toString: function () { return this.message; } };
+            alert(http.responseText);
+        }
+        function invokeLiveApi() {
+            var http = window.XMLHttpRequest ?
+                        new XMLHttpRequest() :
+                        new ActiveXObject('Microsoft.XMLHTTP');
+
+            http.open('POST', 'http://115.28.6.41/VideoControl/library/VideoLibrary.php', false);
+            http.setRequestHeader('Content-Type', 'text/plain; charset=gb2312');
+            var methodName = "getLiveVideoInfo";
+            var appId = "88668301940490240";
+            var appKey = "88668301940490240";
+            var courseCode = "92905205036745986";  
+            //content格式固定，只须替换courseCode即可
+            var content = '[{\"appid\":\"' + appId + '\",\"appkey\":\"' + appKey + '\",\"method\":\"' + methodName + '\",\"param\":[{ \"courseCode\" : \"' + courseCode + '\"}]}]';
+            http.send(content);
+            if (http.status != 200)
+                throw { message: http.status + ' ' + http.statusText, toString: function () { return this.message; } };
+            alert(http.responseText);
+        }
+    </script>
+</head>
+<body>
+    <input id="Button1" type="button" value="点播例子" onclick="invokeApi()"/><br /><p> 
+    <input id="Button2" type="button" value="直播例子" onclick="invokeLiveApi()"/>
+</body>
+</html>

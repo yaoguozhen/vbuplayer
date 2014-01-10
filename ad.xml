@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+	<video fms="rtmp://localhost/vod" stream="streamName"/>
+	<images>
+		<image src="http://xxxxxxxx/a.jpg"/>
+		<image src="http://xxxxxxxx/b.jpg"/>
+		<image src="http://xxxxxxxx/c.jpg"/>
+	</images>
+</data>

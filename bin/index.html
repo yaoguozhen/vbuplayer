@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>直、点播视频播放器示例</title>
+	<meta name="description" content="" />
+	
+	<script src="js/swfobject.js"></script>
+	<script>
+		var flashvars = 
+		{
+		    /*****************  传给flash的参数  ***************/
+		    skin:"videoPlayerSkin.swf",//视频播放器皮肤文件
+			api:"http://115.28.6.41/VideoControl/library/VideoLibrary.php",//api地址
+			progressBarDraged:"false",//进度条是否允许拖动
+			//vid:'[{"appid":"88668301940490240","appkey":"88668301940490240","method":"getVideoInfo","param":[{ "VideoId" : "92905205036745986"}]}]',
+			vid:"[{'appid':'88668301940490240','appkey':'88668301940490240','method':'getLiveVideoInfo','param':[{ 'courseCode' : '92905205036745986'}]}]",
+			live:"true"//是否是直播
+		};
+		var params = 
+		{
+			allowFullscreen: "true",//是否允许flashplayer全屏
+			allowScriptAccess: "always",
+			wmode: "direct" // can cause issues with FP settings & webcam
+		};
+		var attributes = 
+		{
+		    //flashplayer的id
+			id:"videoplayer"
+		};
+		swfobject.embedSWF("videoplayer.swf", "playerContent", "800", "450", "10.0.0", "", flashvars, params, attributes);
+	
+	
+	    //点播视频播放完毕后调用
+	    function videoend()
+		{
+		    alert("播放完毕");
+		}
+		//视频播放过程中每一秒钟都会调用
+		function videoUpatetime(msg)
+		{
+		    form.time.value=msg;
+		}
+		//视频开始播放前调用
+		function setFlashtPlayerStart()
+		{
+		    return "15";
+		}
+	</script>
+</head>
+<body >
+	
+
+<form id="form" name="form1" method="post" action="">
+    <input name="textfield" type="text" id="time" style="width:400px" value="12233333">
+</form>
+<br>
+<div id="playerContent"/>
+</body>
+</html>

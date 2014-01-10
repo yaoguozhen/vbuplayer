@@ -1,0 +1,6 @@
+player.swf?data=
+{
+    fms:"rtmp://localhost/vod",
+	streams:"stream1|500,stream2|1000,stream3|1500",
+	lockProgressBar:"true"
+}
