@@ -4,7 +4,6 @@ package data
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
-	import json.JSON;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
 	
 	/**
@@ -55,16 +54,18 @@ package data
 			var _live = "false";*/
 			
 			var _skin ="videoPlayerSkin.swf";
-			var _uid = '[{"appid":"88668301940490240","appkey":"88668301940490240","method":"getVideoInfo","param":[{ "VideoId" : "92905205036745986"}]}]';
-			var _api = "http://localhost/test.asp";
-			var _progressBarDraged = "true";
-			var _live = "false";
+			var _uid = '12';
+			var _api = "http://localhost/vbuplayer/api.asp";
+			var _autoPlay="true"
+			//var _progressBarDraged = "true";
+			//var _live = "false";
 
 		    YaoTrace.add(YaoTrace.ALL, "接收到 skin 值为：" + _skin);
 			YaoTrace.add(YaoTrace.ALL, "接收到 vid 值为：" + _uid);
 			YaoTrace.add(YaoTrace.ALL, "接收到 api 值为：" + _api);
-			YaoTrace.add(YaoTrace.ALL, "接收到 progressBarDraged 值为：" + _progressBarDraged);
-		    YaoTrace.add(YaoTrace.ALL, "接收到 live 值为：" + _live);
+			YaoTrace.add(YaoTrace.ALL, "接收到 autoPlay 值为：" + _autoPlay);
+			//YaoTrace.add(YaoTrace.ALL, "接收到 progressBarDraged 值为：" + _progressBarDraged);
+		    //YaoTrace.add(YaoTrace.ALL, "接收到 live 值为：" + _live);
 			
 			if (_skin != null && _skin != undefined && _skin != "null" && _skin != "undefined" && _skin != "")
 			{
@@ -72,15 +73,20 @@ package data
 			}
 			if (_uid != null && _uid != undefined && _uid != "null" && _uid != "undefined")
 			{
-				Data.uid = _uid.replace(new RegExp("'", "gm"), "\"");
-				//Data.uid = _uid;
+				Data.uid = _uid;
 			}
 			if (_api != null && _api != undefined && _api != "null" && _api != "undefined" && _api != "")
 			{
 				Data.api = _api;
 			}
-			
-			if (_live == "true")
+			if (_autoPlay != null && _api != _autoPlay && _autoPlay != "null" && _autoPlay != "undefined" && _autoPlay != "")
+			{
+				if (_autoPlay == "false")
+				{
+					Data.autoPlay = false;
+				}
+			}
+			/*if (_live == "true")
 			{
 				Data.live = true;
 			}
@@ -95,7 +101,7 @@ package data
 			else
 			{
 				Data.progressBarDraged = true;
-			}
+			}*/
 		}
 		
 	}

@@ -14,8 +14,10 @@ package skin
 	import com.greensock.*;
 	import com.greensock.easing.*;
 	import data.Data;
+	import skin.events.ChangeLightEvent;
 	import skin.events.ProgressChangeEvent;
 	import skin.events.RateEvent;
+	import skin.events.VideoAreaRateEvent;
 	import skin.events.VolChangeEvent;
 	
 	/**
@@ -27,6 +29,8 @@ package skin
 		private var _controlBar:MovieClip;
 		private var _progressBar:YaoSlider;
 		private var _volBar:YaoSlider;
+		private var _brightnessBar:YaoSlider;//亮度
+		private var _contrastBar:YaoSlider;//对比度
 		private var _hideControlBarTime:Timer;
 		
 		private var _isShow:Boolean = true;
@@ -38,9 +42,10 @@ package skin
 		private var _adMsg:MovieClip;
 		private var _bg:MovieClip;
 		private var _ratePanel:MovieClip;
+		private var _settingPanel:MovieClip;
 		private var _alertMsgBg:MovieClip;
 
-		private var _currentRate:String="biaozhun";
+		private var _currentRate:String="2";
 		
 		private var _volNumBeforeClear:Number;
 		
@@ -71,6 +76,7 @@ package skin
 			_bg = s.bg;
 			_alertMsgBg = s.alertMsgBg;
 			_ratePanel = s.ratePanel;
+			_settingPanel = s.settingPanel;
 			_alertMsg = s.alertMsg;
 			_adMsg = s.adMsg;
 			_controlBar = s.controlBar;
@@ -82,9 +88,10 @@ package skin
 			_controlBar.playBtn.buttonMode = true;
 			_controlBar.pauseBtn.visible = false;
 			_controlBar.pauseBtn.buttonMode = true;
+			_controlBar.settingBtn.buttonMode = true;
 			_controlBar.fullscreenBtn.stop();
 			_controlBar.fullscreenBtn.buttonMode = true;
-			//_bg.visible=false
+			_bg.visible=false
 			
 			_controlBar.progressBar.followBar.width = 0;
 			_controlBar.progressBar.loadingBar.width = 0;
@@ -102,6 +109,7 @@ package skin
 			//_volBar.addEventListener(YaoSlider.BLOCK_RELEASED, volBarReleasedHandler);
 			
 			_controlBar.fullscreenBtn.addEventListener(MouseEvent.CLICK, fullscreenBtnClickHandler);
+			_controlBar.settingBtn.addEventListener(MouseEvent.CLICK, settingBtnClickHandler);
 			_controlBar.playBtn.addEventListener(MouseEvent.CLICK, playBtnClickHandler);
 			_controlBar.pauseBtn.addEventListener(MouseEvent.CLICK, pauseBtnClickHandler);
 			
@@ -112,7 +120,7 @@ package skin
 			_progressBar = new YaoSlider();
 			_progressBar.init(_controlBar.progressBar, 0, 1, false, true);
 			_progressBar.active = -1;
-			_progressBar.currentPercent = 0;
+			playPer = 0;
 			
 			_progressBar.addEventListener(YaoSlider.CHANGE, progressBarChangeHandler);
 			_progressBar.addEventListener(YaoSlider.BLOCK_PRESSED, progressBarPressedHandler);
@@ -123,9 +131,16 @@ package skin
 			_screenClickHot.addEventListener(MouseEvent.DOUBLE_CLICK, screenClickHotDoubleClickHandler);
 			
 			_ratePanel.visible = false;
-			activeRatePanelItem(_ratePanel.liuchang, false);
-			activeRatePanelItem(_ratePanel.biaozhun, false);
-			activeRatePanelItem(_ratePanel.gaoqing, false);
+			activeRatePanelItem(_ratePanel.btn1, false);
+			activeRatePanelItem(_ratePanel.btn2, false);
+			activeRatePanelItem(_ratePanel.btn3, false);
+			
+			_settingPanel.visible = false;
+			initSettingPanel()
+			
+			_ratePanel.btn1.value = "1"
+			_ratePanel.btn2.value = "2"
+			_ratePanel.btn3.value = "3"
 			
 			if (Data.live)
 			{
@@ -171,12 +186,75 @@ package skin
 
 			recordInitNumber();
 		}
+		private function initSettingPanel():void
+		{
+			_settingPanel.rate0.gotoAndStop(2)
+			_settingPanel.rate43.stop()
+			_settingPanel.rate169.stop()
+			_settingPanel.rate0.buttonMode = true;
+			_settingPanel.rate43.buttonMode = true;
+			_settingPanel.rate169.buttonMode = true;
+			_settingPanel.rate0.value = "0"
+			_settingPanel.rate43.value = "43"
+			_settingPanel.rate169.value = "169"
+			_settingPanel.rate0.addEventListener(MouseEvent.CLICK,settingPanelRateBtnClickHandler)
+			_settingPanel.rate43.addEventListener(MouseEvent.CLICK,settingPanelRateBtnClickHandler)
+			_settingPanel.rate169.addEventListener(MouseEvent.CLICK, settingPanelRateBtnClickHandler)
+			_settingPanel.closeBtn.addEventListener(MouseEvent.CLICK, settingPanelCloseBtnClickHandler)
+			
+			_brightnessBar = new YaoSlider()
+			_brightnessBar.init(_settingPanel.brightnessBar)
+			_brightnessBar.currentPercent = 0.5
+			_brightnessBar.addEventListener(YaoSlider.CHANGE, brightnessChangeHandler);
+			_contrastBar = new YaoSlider()
+			_contrastBar.init(_settingPanel.contrastBar)
+			_contrastBar.currentPercent = 0.75
+			_contrastBar.addEventListener(YaoSlider.CHANGE, contrastChangeHandler);
+			
+			_settingPanel.currentRateBtn = _settingPanel.rate0;
+		}
+		private function brightnessChangeHandler(evn:Event):void
+		{
+			var event:ChangeLightEvent = new ChangeLightEvent(ChangeLightEvent.CHANGE);
+			event.changeType = "brightness"
+			event.value=_brightnessBar.currentPercent*510-255
+			dispatchEvent(event)
+		}
+		private function contrastChangeHandler(evn:Event):void
+		{
+			var event:ChangeLightEvent = new ChangeLightEvent(ChangeLightEvent.CHANGE);
+			event.changeType = "contrast"
+			event.value=_contrastBar.currentPercent*510-255
+			dispatchEvent(event)
+		}
+		private function settingPanelRateBtnClickHandler(evn:MouseEvent ):void
+		{
+			if (evn.currentTarget != _settingPanel.currentRate)
+			{
+				if (_settingPanel.currentRateBtn)
+				{
+					_settingPanel.currentRateBtn.gotoAndStop(1)
+				}
+				
+				_settingPanel.currentRateBtn = evn.currentTarget
+			    _settingPanel.currentRateBtn.gotoAndStop(2)
+			
+				var event:VideoAreaRateEvent = new VideoAreaRateEvent(VideoAreaRateEvent.RATE_CHANGE);
+				event.rate = _settingPanel.currentRateBtn.value;
+				dispatchEvent(event)
+			}
+		}
+		private function settingPanelCloseBtnClickHandler(evn:MouseEvent):void
+		{
+			_settingPanel.visible=!_settingPanel.visible
+		}
 		private function recordInitNumber():void
 		{
 			record(_controlBar.controlBarBg);
 			record(_controlBar.playBtn);
 			record(_controlBar.pauseBtn);
 			record(_controlBar.fullscreenBtn);
+			record(_controlBar.settingBtn);
 			record(_controlBar.volBtn);
 			record(_controlBar.volBar);
 			record(_controlBar.time);
@@ -192,7 +270,11 @@ package skin
 		}
 		private function rateBtnClickHandler(evn:MouseEvent):void
 		{
-			_ratePanel.visible=!_ratePanel.visible
+			_ratePanel.visible = !_ratePanel.visible
+			if (_settingPanel.visible)
+			{
+				_settingPanel.visible=false
+			}
 		}
 		private function stageMouseMoveHandler123(evn:MouseEvent):void
 		{
@@ -218,10 +300,18 @@ package skin
 		{
 			dispatchEvent(new Event("fullscreenBtnClick"));
 		}
+		private function settingBtnClickHandler(evn:MouseEvent ):void
+		{
+			_settingPanel.visible = !_settingPanel.visible
+			if (_ratePanel.visible)
+			{
+				_ratePanel.visible = false;
+			}
+		}
 		private function progressBarChangeHandler(evn:Event):void
 		{
 			var event:ProgressChangeEvent = new ProgressChangeEvent(ProgressChangeEvent.CHANGE);
-			event.per = _progressBar.currentPercent;
+			event.per = playPer;
 			dispatchEvent(event);
 		}
 		private function progressBarPressedHandler(evn:Event):void
@@ -253,7 +343,7 @@ package skin
 		{
 			if ((_controlBar.progressBar.path.mouseX / _controlBar.progressBar.width) < _controlBar.progressBar.loadingBar.scaleX)
 			{
-				_progressBar.currentPercent = _controlBar.progressBar.path.mouseX / _controlBar.progressBar.width;
+				playPer = _controlBar.progressBar.path.mouseX / _controlBar.progressBar.width;
 				dispatchEvent(new Event("progressBarChange"));
 			}
 		}
@@ -335,9 +425,9 @@ package skin
 		private function itemClickHandler(evn:MouseEvent):void
 		{
 			var item:MovieClip = MovieClip(evn.currentTarget);
-			if (_currentRate != item.name)
+			if (_currentRate != item.value)
 			{
-				_currentRate = item.name;
+				_currentRate = item.value;
 				_controlBar.rateBtn.rate.text = item.rate.text;
 
 				var event:RateEvent = new RateEvent(RateEvent.RATE_CHANGE);
@@ -373,13 +463,8 @@ package skin
 					{
 						_controlBar.playBtn.visible = true;
 						_controlBar.pauseBtn.visible = false;
-						_progressBar.currentPercent = 0;
 					}
-					//因为点播播放完毕后不需要重播，所以这里注释掉了
-					if (status == Data.CLOSED)
-					{
-						_bigPlayBtn.visible = true;
-					}
+					_bigPlayBtn.visible = true;
 					break;
 			}
 		}
@@ -388,16 +473,16 @@ package skin
 			var n:uint = Data.streams.length;
 			for (var i:uint = 0; i < n; i++)
 			{
-				switch(Data.streams[i][1])
+				switch(String(Data.streams[i].type))
 				{
-					case "liuchang":
-						activeRatePanelItem(_ratePanel.liuchang,true);
+					case "1":
+						activeRatePanelItem(_ratePanel.btn1,true);
 						break;
-					case "biaozhun":
-						activeRatePanelItem(_ratePanel.biaozhun,true);
+					case "2":
+						activeRatePanelItem(_ratePanel.btn2,true);
 						break;
-					case "gaoqing":
-						activeRatePanelItem(_ratePanel.gaoqing,true);
+					case "3":
+						activeRatePanelItem(_ratePanel.btn3,true);
 						break;
 				}
 			}
@@ -406,14 +491,14 @@ package skin
 		{
 			switch(rate)
 			{
-				case "liuchang":
-					_controlBar.rateBtn.rate.text = "流畅";
+				case "1":
+					_controlBar.rateBtn.rate.text = "标清";
 					break;
-				case "biaozhun":
-					_controlBar.rateBtn.rate.text = "标准";
-					break;
-				case "gaoqing":
+				case "2":
 					_controlBar.rateBtn.rate.text = "高清";
+					break;
+				case "3":
+					_controlBar.rateBtn.rate.text = "超清";
 					break;
 			}
 			_currentRate = rate;
@@ -426,6 +511,7 @@ package skin
 			_controlBar.volBtn.x = _controlBar.controlBarBg.width - _controlBar.volBtn.disRight;
 			_controlBar.volBar.x = _controlBar.controlBarBg.width - _controlBar.volBar.disRight;
 			_controlBar.fullscreenBtn.x = _controlBar.controlBarBg.width - _controlBar.fullscreenBtn.disRight;			
+			_controlBar.settingBtn.x = _controlBar.controlBarBg.width - _controlBar.settingBtn.disRight;
 			
 			_screenClickHot.width = _controlBar.controlBarBg.width;
 			_screenClickHot.height = _stage.stageHeight - _controlBar.controlBarBg.height;
@@ -440,7 +526,7 @@ package skin
 			_bg.height = _stage.stageHeight - _controlBar.controlBarBg.height;
 			_controlBar.rateBtn.x = _controlBar.controlBarBg.width - _controlBar.rateBtn.disRight;
 			
-			_controlBar.progressBar.progressBarBg2.width = _controlBar.rateBtn.x - _controlBar.progressBar.x - 10;
+			_controlBar.progressBar.progressBarBg2.width = _controlBar.volBtn.x - _controlBar.progressBar.x - 10;
 			_controlBar.progressBar.progressBarBg.width = _controlBar.progressBar.progressBarBg2.width-10;
 			/*
 			    下面如果直接写
@@ -452,6 +538,9 @@ package skin
 
 			_ratePanel.x = _stage.stageWidth - _ratePanel.disRight;
 			_ratePanel.y = _controlBar.y - _ratePanel.height;
+			
+			_settingPanel.x = _stage.stageWidth - _settingPanel.width-5;
+			_settingPanel.y = _controlBar.y - _settingPanel.height-5;
 			
 			_adMsg.x = (_stage.stageWidth - _adMsg.width) / 2;
 			_adMsg.y = 10;
@@ -467,25 +556,30 @@ package skin
 			_controlBar.time.txt.text = MyDate.getFormatTime(totalTime, true) + " / " +MyDate.getFormatTime(currentTime, true) ;
 		    if (totalTime > 0)
 			{
-				_progressBar.currentPercent = currentTime / totalTime;
+				playPer = currentTime / totalTime;
 			}
 		}
 		private function _unActiveRatePanelItem(rate:String):void
 		{
 			switch(rate)
 			{
-				case "liuchang":
-					activeRatePanelItem(_ratePanel.liuchang, false);
+				case "1":
+					activeRatePanelItem(_ratePanel.btn1, false);
 					break;
-				case "biaozhun":
-					activeRatePanelItem(_ratePanel.biaozhun, false);
+				case "2":
+					activeRatePanelItem(_ratePanel.btn2, false);
 					break;
-				case "gaoqing":
-					activeRatePanelItem(_ratePanel.gaoqing, false);
+				case "3":
+					activeRatePanelItem(_ratePanel.btn3, false);
 					break;
 			}
 		}
-		
+		public function onVideoDateLoadError(errMsg:String=null):void
+		{
+			alertMsg = errMsg;
+			_bigPlayBtn.visible = false
+			playBtnEnabled=false
+		}
 		public function add(skin:Skin):void
 		{
 			initTimer();
@@ -584,7 +678,7 @@ package skin
 			_progressBar.currentPercent = n;
 		}
 		//进度条当前值
-		public function get progressBarCurrentPercent():Number
+		public function get playPer():Number
 		{
 			return _progressBar.currentPercent;
 		}

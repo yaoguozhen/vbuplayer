@@ -122,9 +122,10 @@
 			}
 			else
 			{
-				var streamArray:Array = getStream();
-				dispacheVideoRatio(streamArray[2]);
-				_tempStream.play(streamArray[0], 0);
+				var stream:String = getStream();
+				//dispacheVideoRatio(streamArray[2]);
+				trace(stream)
+				_tempStream.play(stream, 0);
 				//_tempStream.seek(_startTime);
 			}	
 		}
@@ -197,27 +198,27 @@
 			
 			switch (_currentRate)
 			{
-				case "biaozhun":	
+				case "2":	
 					if (_lastPlayRate)
 					{
 						changeStreamRate(_lastPlayRate);
 					}
 					else
 					{
-						changeStreamRate("liuchang");
+						changeStreamRate("1");
 					}
 					break;
-				case "liuchang":
+				case "1":
 					if (_lastPlayRate)
 					{
 						changeStreamRate(_lastPlayRate);
 					}
 					else
 					{
-						changeStreamRate("gaoqing");
+						changeStreamRate("3");
 					}
 					break;
-				case "gaoqing":
+				case "3":
 					if (_lastPlayRate)
 					{
 						changeStreamRate(_lastPlayRate);
@@ -348,9 +349,7 @@
 			_bufferingTimer.stop();
 			_playingTimer.stop();
 			_buffering = false;
-			//_netStream.seek(0);
-			//_netStream.pause();
-					
+
 			bufferFullCount = 0;
 			
 			var event:PlayStatusEvent = new PlayStatusEvent(PlayStatusEvent.CHANGE);
@@ -494,9 +493,9 @@
 						//_playingTimer.start();
 						break;
 					case Data.COMPLETE:
-						var streamArray:Array = getStream();
-						dispacheVideoRatio(streamArray[2]);
-						_netStream.play(streamArray[0],0);
+						var stream:String = getStream();
+						//dispacheVideoRatio(streamArray[2]);
+						_netStream.play(stream,0);
 						_playStatus = Data.PLAY;
 						_playingTimer.start();
 						break;
@@ -622,13 +621,10 @@
 		{
 			_totalTime = obj.duration*1000;
 			
-			if (_live)
-			{
-				var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
-				event.videoWidth = obj.width;
-				event.videoHeight = obj.height;
-				dispatchEvent(event);
-			}
+			var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
+			event.videoWidth = obj.width;
+			event.videoHeight = obj.height;
+			dispatchEvent(event);
 		}
 		public function onPlayStatus(obj:Object):void
 		{
@@ -666,7 +662,7 @@
 			
 		}
 		/****************************************************************************** 方法 **********************/
-		public function play(stream:Object,fms:String="",startRate:String="biaozhun",startTime:Number=0,bufferTime:Number=5000,live:Boolean=false):void
+		public function play(stream:Object,fms:String="",startRate:String="2",startTime:Number=0,bufferTime:Number=5000,live:Boolean=false):void
 		{
 			_play(stream,fms,startRate,startTime,bufferTime,live);
 		}
@@ -696,19 +692,19 @@
 			rateEvent.rate = _currentRate;
 			dispatchEvent(rateEvent);
 			
-			var streamArray:Array = getStream();
-			dispacheVideoRatio(streamArray[2]);
-			_tempStream.play(streamArray[0], 0);
+			var stream:String = getStream();
+			//dispacheVideoRatio(streamArray[2]);
+			_tempStream.play(stream, 0);
 			//_tempStream.seek(tempTime);
 		}
-		private function getStream():Array
+		private function getStream():String
 		{
 			var n:uint = _stream.length;
 			for (var i:uint = 0; i < n; i++)
 			{
-				if (_stream[i][1] == _currentRate)
+				if (_stream[i].type == _currentRate)
 				{
-					return _stream[i];
+					return String(_stream[i].stream);
 				}
 			}
 			return null;
@@ -721,9 +717,9 @@
 			}
 			else
 			{
-				var streamArray:Array = getStream();
-				dispacheVideoRatio(streamArray[2]);
-				_netStream.play(streamArray[0],0);
+				var stream:String = getStream();
+				//dispacheVideoRatio(streamArray[2]);
+				_netStream.play(stream,0);
 			}
 		}
 		public function pause():void

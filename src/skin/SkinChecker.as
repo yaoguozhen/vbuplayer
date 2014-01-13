@@ -88,6 +88,11 @@ package skin
 				{
 					return "全屏按钮：controlBar.fullscreenBtn";
 				}
+				var settingBtn = mc.controlBar.getChildByName("settingBtn");
+				if (settingBtn == null)
+				{
+					return "设置按钮：controlBar.settingBtn";
+				}
 				var time = mc.controlBar.getChildByName("time");
 				if (time == null)
 				{

@@ -27,6 +27,7 @@ package skin
 		private var _bg:MovieClip;
 		private var _adMsg:MovieClip;
 		private var _ratePanel:MovieClip;
+		private var _settingPanel:MovieClip;
 		private var _alertMsgBg:MovieClip
 		
 		public function Skin() :void
@@ -62,6 +63,7 @@ package skin
 			_bg = _content.bg;
 			_alertMsgBg = _content.alertMsgBg;
 			_ratePanel = _content.ratePanel;
+			_settingPanel = _content.settingPanel;
 
 			_missComponent = SkinChecker.check(_content);
 
@@ -77,7 +79,7 @@ package skin
 		 */
 		private function loadErrorHandler(evn:IOErrorEvent):void
 		{
-			YaoTrace.add(YaoTrace.ERROR, "皮肤文件加载出错");
+			YaoTrace.add(YaoTrace.ERROR, "皮肤文件加载出错，错误信息："+evn.text);
 			
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, loadComHandler);
 			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, loadErrorHandler);
@@ -141,6 +143,11 @@ package skin
 		public function get ratePanel():MovieClip
 		{
 			return _ratePanel;
+		}
+		//切换码率面板
+		public function get settingPanel():MovieClip
+		{
+			return _settingPanel;
 		}
 		//警告框背景
 		public function get alertMsgBg():MovieClip

@@ -47,8 +47,8 @@ package
 
 		private function init(e:Event = null):void 
 		{
-			YaoTrace.init(stage, "youku.tudou.qq");
-			YaoTrace.add(YaoTrace.ALL, " 修改音量滑块拖动问题 ");
+			YaoTrace.init(stage, "xxx");
+			//YaoTrace.add(YaoTrace.ALL, " 修改音量滑块拖动问题 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             
@@ -70,7 +70,8 @@ package
 			if (checkRezult == "")
 			{
 				initSkinLoader();
-				_skin.load(Data.skin+"?random="+Math.random());
+				//_skin.load(Data.skin+"?random="+Math.random());
+				_skin.load(Data.skin);
 			}
 			else
 			{
@@ -86,13 +87,13 @@ package
 			else
 			{
 				YaoTrace.add(YaoTrace.ERROR, "视频信息格式不正确");
-				_abc.alertMsg1 = "获取视频信息出错";
+				_abc.onVideoDateLoadError("获取视频信息出错")
 			}
 		}
 		private function videoDataLoadErrHandler(evn:IOErrorEvent):void
 		{
 			YaoTrace.add(YaoTrace.ERROR, "视频信息获取失败");
-			_abc.alertMsg1 = "获取视频信息失败";
+			_abc.onVideoDateLoadError("获取视频信息出错")
 		}
 		private function initSkinLoader():void
 		{
@@ -114,12 +115,13 @@ package
 				addChild(_skin.bigPlayBtn);
 				addChild(_skin.adMsg);
 				addChild(_skin.ratePanel);
+				addChild(_skin.settingPanel);
 				
 				_abc = new ABC();
 				_abc.addObject(_videoPlayer, _skin, stage);
 				_abc.scale(false, Data.videoRatio);
 				
-				_abc.alertMsg1 = "正在获取视频信息....";
+				_abc.alertMsg1 = " ";
 				_videoData.load();
 			}
 			else
@@ -156,21 +158,13 @@ package
 		
 		/*******************************************************************************************/
 		
-		public function v_start(stream:Object,fms:String="",videoRatio=""):void
+		public function v_start(streams:Object,fms:String="",videoRatio=""):void
 		{
 			//Data.videoRatio=getVideoRatio(videoRatio);
-
-			if (Data.live)
+			if (Data.autoPlay)
 			{
-				_abc.play(Data.streams,Data.fms);
-			}
-			else
-			{
-				if (Data.autoPlay)
-				{
-					_abc.play(Data.streams, Data.fms);
-					_abc.initRate();
-				}
+				_abc.play(streams, fms);
+				_abc.initRate();
 			}
 		}
 		public function v_pause():void

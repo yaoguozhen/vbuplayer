@@ -2,6 +2,7 @@ package
 {
 	import data.Data;
 	import data.DispatchEvents;
+	import flash.display.DisplayObject;
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -12,8 +13,10 @@ package
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import skin.ControlBarManager;
+	import skin.events.ChangeLightEvent;
 	import skin.events.ProgressChangeEvent;
 	import skin.events.RateEvent;
+	import skin.events.VideoAreaRateEvent;
 	import skin.events.VolChangeEvent;
 	import skin.MyDate;
 	import video.AdvVideoPlayer;
@@ -28,7 +31,8 @@ package
 	import video.events.StreamNotFountEvent;
 	import video.VideoPlayer;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
-	
+	import fl.motion.ColorMatrix;
+	import flash.filters.ColorMatrixFilter;
 	/**
 	 * ...
 	 * @author t
@@ -43,7 +47,8 @@ package
         private var _callJSPerSecondTimer:Timer;//每秒钟调用js定时器
 		private var _hideLastPlayTimeAlertTimer:Timer;//上次播放时间消失定时器
 		private var _lastTime:Number = 0;//上次播放时间
-		
+		private var _ld_Filter:ColorMatrixFilter = new ColorMatrixFilter();
+		private var _db_Filter:ColorMatrixFilter = new ColorMatrixFilter();
 		public function ABC() :void
 		{
 			_callJSPerSecondTimer = new Timer(1000);
@@ -98,6 +103,8 @@ package
 			_controlBarManager.addEventListener(VolChangeEvent.CHANGE, volChangeHandler);
 			_controlBarManager.addEventListener(ProgressChangeEvent.CHANGE, progressChangeHandler);
 			_controlBarManager.addEventListener(RateEvent.RATE_CHANGE, controlBarRateChangeHandler);
+			_controlBarManager.addEventListener(VideoAreaRateEvent.RATE_CHANGE, videoAreaRateEventHandler);
+			_controlBarManager.addEventListener(ChangeLightEvent.CHANGE, changeLightEventHandler);
 			_controlBarManager.add(_skin);
 		}
 		private function playStatusChangeHandler(evn:PlayStatusEvent):void
@@ -132,12 +139,12 @@ package
 		private function onPlayComplete():void//点播播放完毕
 		{
 			_videoPlayer.visible = false;
-			_controlBarManager.progressBarActive = -1;
-			_controlBarManager.playBtnEnabled = false;
+			//_controlBarManager.progressBarActive = -1;
+			//_controlBarManager.playBtnEnabled = false;
 			_controlBarManager.setBuffering(false);
-			_callJSPerSecondTimer.reset();
+			//_callJSPerSecondTimer.reset();
 			_controlBarManager.rateBtnEnabled = false;
-			DispatchEvents.STREAM_PLAY_COMPLETE();
+			//DispatchEvents.STREAM_PLAY_COMPLETE();
 		}
 		private function onUnPublish():void//直播停止发布
 		{
@@ -169,7 +176,7 @@ package
 			_controlBarManager.setTime(evn.currentTime, _videoPlayer.totalTime);
 			if (!_callJSPerSecondTimer.running)
 			{
-				_callJSPerSecondTimer.start();
+				//_callJSPerSecondTimer.start();
 			}
 		}
 		private function bufferingHandler(evn:BufferingEvent):void
@@ -221,19 +228,16 @@ package
 		}
 		private function onMetaDataHandler(evn:OnMetaDataEvent):void
 		{
-			if (Data.live)
+			if (evn.videoWidth != undefined && evn.videoHeight != undefined)
 			{
-				if (evn.videoWidth != undefined && evn.videoHeight != undefined)
-				{
-					YaoTrace.add(YaoTrace.ALL,"元数据中有视频长宽值，使用元数据的长宽值计算")
-					Data.videoRatio = evn.videoWidth / evn.videoHeight;
-				}
-				else
-				{
-					YaoTrace.add(YaoTrace.ALERT,"元数据中没有视频长宽值")
-				}
-				scale(Data.isFullScreen, Data.videoRatio);
+				YaoTrace.add(YaoTrace.ALL,"元数据中有视频长宽值，使用元数据的长宽值计算")
+				Data.videoRatio = evn.videoWidth / evn.videoHeight;
 			}
+			else
+			{
+				YaoTrace.add(YaoTrace.ALERT,"元数据中没有视频长宽值,将使用默认比例")
+			}
+			scale(Data.isFullScreen, Data.videoRatio);
 		}
 		private function streamNotFoundHandler(evn:Event):void
 		{
@@ -374,6 +378,53 @@ package
 		{
 			_videoPlayer.changeStreamRate(evn.rate);
 		}
+		private function videoAreaRateEventHandler(evn:VideoAreaRateEvent):void
+		{
+			var per:Number = 0
+			switch(evn.rate)
+			{
+				case "0":
+					per = Number(Data.videoRatio);
+				    break;
+				case "43":
+					per = 4 / 3;
+					break;
+				case "169":
+					per = 16 / 9;
+					break;
+			}
+			scale(Data.isFullScreen, per);
+		}
+		private function changeLightEventHandler(evn:ChangeLightEvent):void
+		{
+			switch(evn.changeType)
+			{
+				case "brightness":
+					setVideoBrightness(_videoPlayer,evn.value)
+					break;
+				case "contrast":
+					setVideoContrast(_videoPlayer,evn.value)
+					break;
+			}
+		}
+		private function setVideoBrightness(obj:DisplayObject,value:Number):void
+		{
+			var ld_Matrix:ColorMatrix=new ColorMatrix();
+			ld_Matrix.SetBrightnessMatrix(value);  //设置亮度值，值的大小是 -255--255   0为中间值，向右为亮向左为暗。
+			_ld_Filter.matrix = ld_Matrix.GetFlatArray();
+			obj.filters = [_ld_Filter,_db_Filter];
+			//ld_MC.filters = [];//去除滤镜
+		}
+		private function setVideoContrast(obj:DisplayObject,value:Number):void
+		{
+			var db_Matrix:ColorMatrix=new ColorMatrix();  
+			db_Matrix.SetContrastMatrix(value);    
+			//设置对比度值，值的大小是 -255--255  127.5为中间值，  
+			//向右对比鲜明向左对比偏暗。  
+			_db_Filter.matrix = db_Matrix.GetFlatArray();  
+			obj.filters = [_ld_Filter,_db_Filter];  
+			//db_MC.filters = [];//去除滤镜  
+		}
 		private function videoPlayerRateChangeHandler(evn:RateEvent):void
 		{
 			_controlBarManager.setCurrentRate(evn.rate);
@@ -474,7 +525,8 @@ package
 			{
 				if (_videoPlayer.playCount==0)
 				{
-					_lastTime = DispatchEvents.GET_STARTTIME();
+					//_lastTime = DispatchEvents.GET_STARTTIME();
+					_lastTime = 0;
 					_videoPlayer.play(stream,fms,_controlBarManager.currentRate,_lastTime,Data.VOD_BUFFERTIME,false);
 				}
 				else
@@ -487,6 +539,10 @@ package
 		public function initRate():void
 		{
 			_controlBarManager.initRate();
+		}
+		public function onVideoDateLoadError(errMsg:String=null):void
+		{
+			_controlBarManager.onVideoDateLoadError(errMsg)
 		}
 		
 		//设置提示信息
