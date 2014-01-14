@@ -33,6 +33,7 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>E:\work\flash\vbu_videoplayer\src</path-element>
+      <path-element>D:\Program Files (x86)\Adobe Flash CS6\Adobe Flash CS6\Common\Configuration\ActionScript 3.0\projects\Flash\src</path-element>
       <path-element>D:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
