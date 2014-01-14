@@ -222,7 +222,10 @@ package
 		{
 			if (b)
 			{
-				_path.addEventListener(MouseEvent.ROLL_OVER, pathRollOverHandler);
+				if (_stream && _stream != "")
+				{
+					_path.addEventListener(MouseEvent.ROLL_OVER, pathRollOverHandler);
+				}
 			}
 			else
 			{
