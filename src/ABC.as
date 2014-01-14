@@ -31,8 +31,8 @@ package
 	import video.events.StreamNotFountEvent;
 	import video.VideoPlayer;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
-	import fl.motion.ColorMatrix;
-	import flash.filters.ColorMatrixFilter;
+	//import fl.motion.ColorMatrix;
+	//import flash.filters.ColorMatrixFilter;
 	/**
 	 * ...
 	 * @author t
@@ -47,8 +47,8 @@ package
         private var _callJSPerSecondTimer:Timer;//每秒钟调用js定时器
 		private var _hideLastPlayTimeAlertTimer:Timer;//上次播放时间消失定时器
 		private var _lastTime:Number = 0;//上次播放时间
-		private var _ld_Filter:ColorMatrixFilter = new ColorMatrixFilter();
-		private var _db_Filter:ColorMatrixFilter = new ColorMatrixFilter();
+		//private var _ld_Filter:ColorMatrixFilter = new ColorMatrixFilter();
+		//private var _db_Filter:ColorMatrixFilter = new ColorMatrixFilter();
 		public function ABC() :void
 		{
 			_callJSPerSecondTimer = new Timer(1000);
@@ -127,6 +127,7 @@ package
 			switch(evn.status)
 			{
 				case Data.PLAY:
+					_controlBarManager.previewVideo = true;
 					break;
 				case Data.COMPLETE:
 					onPlayComplete();
@@ -145,6 +146,7 @@ package
 			//_callJSPerSecondTimer.reset();
 			_controlBarManager.rateBtnEnabled = false;
 			//DispatchEvents.STREAM_PLAY_COMPLETE();
+			_controlBarManager.previewVideo = false;
 		}
 		private function onUnPublish():void//直播停止发布
 		{
@@ -409,21 +411,21 @@ package
 		}
 		private function setVideoBrightness(obj:DisplayObject,value:Number):void
 		{
-			var ld_Matrix:ColorMatrix=new ColorMatrix();
+			/*var ld_Matrix:ColorMatrix=new ColorMatrix();
 			ld_Matrix.SetBrightnessMatrix(value);  //设置亮度值，值的大小是 -255--255   0为中间值，向右为亮向左为暗。
 			_ld_Filter.matrix = ld_Matrix.GetFlatArray();
 			obj.filters = [_ld_Filter,_db_Filter];
-			//ld_MC.filters = [];//去除滤镜
+			//ld_MC.filters = [];//去除滤镜*/
 		}
 		private function setVideoContrast(obj:DisplayObject,value:Number):void
 		{
-			var db_Matrix:ColorMatrix=new ColorMatrix();  
+			/*var db_Matrix:ColorMatrix=new ColorMatrix();  
 			db_Matrix.SetContrastMatrix(value);    
 			//设置对比度值，值的大小是 -255--255  127.5为中间值，  
 			//向右对比鲜明向左对比偏暗。  
 			_db_Filter.matrix = db_Matrix.GetFlatArray();  
 			obj.filters = [_ld_Filter,_db_Filter];  
-			//db_MC.filters = [];//去除滤镜  
+			//db_MC.filters = [];//去除滤镜  */
 		}
 		private function videoPlayerRateChangeHandler(evn:RateEvent):void
 		{
@@ -533,6 +535,7 @@ package
 				{
 					_videoPlayer.play(stream,fms,_controlBarManager.currentRate,0,Data.VOD_BUFFERTIME,false);
 				}
+				_controlBarManager.setPreviewVideo(Data.fms,Data.previewStream);
 			}
 		}
 		//设置码率面板

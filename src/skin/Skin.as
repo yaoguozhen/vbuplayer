@@ -28,6 +28,7 @@ package skin
 		private var _adMsg:MovieClip;
 		private var _ratePanel:MovieClip;
 		private var _settingPanel:MovieClip;
+		private var _preview:MovieClip;
 		private var _alertMsgBg:MovieClip
 		
 		public function Skin() :void
@@ -64,6 +65,7 @@ package skin
 			_alertMsgBg = _content.alertMsgBg;
 			_ratePanel = _content.ratePanel;
 			_settingPanel = _content.settingPanel;
+			_preview = _content.preview;
 
 			_missComponent = SkinChecker.check(_content);
 
@@ -148,6 +150,10 @@ package skin
 		public function get settingPanel():MovieClip
 		{
 			return _settingPanel;
+		}
+		public function get preview():MovieClip
+		{
+			return _preview;
 		}
 		//警告框背景
 		public function get alertMsgBg():MovieClip

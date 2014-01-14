@@ -1,4 +1,4 @@
-﻿package video
+﻿package video.preview
 {
 	import data.Data;
 	import flash.display.Sprite;

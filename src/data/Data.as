@@ -27,6 +27,7 @@ package data
 		
 		public static var fms:String;//fms地址
 		public static var streams:Object;//流名称
+		public static var previewStream:String
 
 		public static var isFullScreen:Boolean = false;//是否是全屏		
 		

@@ -71,6 +71,18 @@ package data
 							YaoTrace.add(YaoTrace.ERROR, "视频信息json数据中stream参数中流的数量必须不为0！");
 							analyseSuccess = false;
 						}
+						else
+						{
+							var n = Data.streams.length;
+							for (var i:uint = 0; i < n; i++)
+							{
+								if (Data.streams[i].type == "0")
+								{
+									Data.previewStream = Data.streams[i].stream;
+									break
+								}
+							}
+						}
 					}
 				}
 			}

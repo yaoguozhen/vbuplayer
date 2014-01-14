@@ -1,1 +1,1 @@
-{"fms":"rtmp://localhost/vod","streams":[{"type":"0","stream":"sample"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":"26"}
+{"fms":"rtmp://localhost/vod","streams":[{"type":"0","stream":"mp4:stream_yulan.f4v"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":"26"}

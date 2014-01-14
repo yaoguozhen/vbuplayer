@@ -70,8 +70,8 @@ package
 			if (checkRezult == "")
 			{
 				initSkinLoader();
-				//_skin.load(Data.skin+"?random="+Math.random());
-				_skin.load(Data.skin);
+				_skin.load(Data.skin+"?random="+Math.random());
+				//_skin.load(Data.skin);
 			}
 			else
 			{
@@ -116,6 +116,7 @@ package
 				addChild(_skin.adMsg);
 				addChild(_skin.ratePanel);
 				addChild(_skin.settingPanel);
+				addChild(_skin.preview);
 				
 				_abc = new ABC();
 				_abc.addObject(_videoPlayer, _skin, stage);

@@ -32,6 +32,7 @@ package skin
 		private var _brightnessBar:YaoSlider;//亮度
 		private var _contrastBar:YaoSlider;//对比度
 		private var _hideControlBarTime:Timer;
+		private var _videoPreview:VideoPreview;
 		
 		private var _isShow:Boolean = true;
 		private var _stage:Stage;
@@ -43,6 +44,7 @@ package skin
 		private var _bg:MovieClip;
 		private var _ratePanel:MovieClip;
 		private var _settingPanel:MovieClip;
+		private var _preview:MovieClip;
 		private var _alertMsgBg:MovieClip;
 
 		private var _currentRate:String="2";
@@ -54,7 +56,7 @@ package skin
 		
 		public function ControlBarManager() :void
 		{
-				
+			
 		}
 		private function initTimer():void
 		{
@@ -77,6 +79,7 @@ package skin
 			_alertMsgBg = s.alertMsgBg;
 			_ratePanel = s.ratePanel;
 			_settingPanel = s.settingPanel;
+			_preview = s.preview;
 			_alertMsg = s.alertMsg;
 			_adMsg = s.adMsg;
 			_controlBar = s.controlBar;
@@ -117,10 +120,14 @@ package skin
 			_controlBar.progressBar.loadingBar.width = 0;
 			_controlBar.progressBar.followBar.width = 0;
 			
+			_preview.visible = false;
+			
 			_progressBar = new YaoSlider();
 			_progressBar.init(_controlBar.progressBar, 0, 1, false, true);
 			_progressBar.active = -1;
 			playPer = 0;
+			_videoPreview = new VideoPreview()
+			_videoPreview.init(_preview,_controlBar.progressBar.path)
 			
 			_progressBar.addEventListener(YaoSlider.CHANGE, progressBarChangeHandler);
 			_progressBar.addEventListener(YaoSlider.BLOCK_PRESSED, progressBarPressedHandler);
@@ -316,10 +323,12 @@ package skin
 		}
 		private function progressBarPressedHandler(evn:Event):void
 		{
+			_videoPreview.active = false;
 			dispatchEvent(new Event("progressBarBlockPressed"))
 		}
 		private function progressBarReleasedHandler(evn:Event):void
 		{
+			_videoPreview.active = true;
 			dispatchEvent(new Event("progressBarBlockReleased"))
 		}
 		private function screenClickHotClickHandler(evn:Event):void
@@ -621,6 +630,10 @@ package skin
 		{
 			_unActiveRatePanelItem(rate);
 		}
+		public function setPreviewVideo(fms:String, stream:String):void
+		{
+			_videoPreview.setVideo(fms, stream);
+		}
 		//是否全屏
 		public function get isFullScreen():Boolean
 		{
@@ -709,6 +722,10 @@ package skin
 		public function get currentRate():String
 		{
 			return _currentRate;
+		}
+		public function set previewVideo(b:Boolean):void
+		{
+			_videoPreview.active = b;
 		}
 		//切换码率按钮是否可用
 		public function set rateBtnEnabled(b:Boolean):void
