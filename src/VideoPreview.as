@@ -222,7 +222,7 @@ package
 		{
 			if (b)
 			{
-				if (_stream && _stream != "")
+				if (_stream && _stream != "" && _stream != "null" && _stream != "undefined")
 				{
 					_path.addEventListener(MouseEvent.ROLL_OVER, pathRollOverHandler);
 				}

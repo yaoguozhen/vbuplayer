@@ -120,10 +120,11 @@ package
 				
 				_abc = new ABC();
 				_abc.addObject(_videoPlayer, _skin, stage);
+				_abc.addEventListener("playNext",playNextHandler)
 				_abc.scale(false, Data.videoRatio);
 				
 				_abc.alertMsg1 = " ";
-				_videoData.load();
+				_videoData.load(Data.uid);
 			}
 			else
 			{
@@ -135,7 +136,10 @@ package
 		{
 			
 		}
-		
+		private function playNextHandler(evn:Event):void
+		{
+			_videoData.load(Data.nextVideo);
+		}
 		private function resizeHandler(evn:Event):void
 		{
 			_abc.scale(false,Data.videoRatio);

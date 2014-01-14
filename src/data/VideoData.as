@@ -65,6 +65,7 @@ package data
 					}
 					else
 					{
+						Data.nextVideo = String(jsonObject.nextStream);
 						Data.streams = jsonObject.streams;
 						if (Data.streams.length == 0)
 						{
@@ -78,7 +79,7 @@ package data
 							{
 								if (Data.streams[i].type == "0")
 								{
-									Data.previewStream = Data.streams[i].stream;
+									Data.previewStream = String(Data.streams[i].stream);
 									break
 								}
 							}
@@ -101,12 +102,12 @@ package data
 			removeListener()
 			dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
 		}
-		public function load():void
+		public function load(uid:String):void
 		{
 			YaoTrace.add(YaoTrace.ALL, "开始获取视频数据，向 "+Data.api+" 发送 :"+Data.uid);
 			
 			var urlRequest:URLRequest = new URLRequest();
-			urlRequest.data = Data.uid;
+			urlRequest.data = uid;
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.url = Data.api+"?random="+String(Math.random());
 			

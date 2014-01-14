@@ -473,7 +473,14 @@ package skin
 						_controlBar.playBtn.visible = true;
 						_controlBar.pauseBtn.visible = false;
 					}
-					_bigPlayBtn.visible = true;
+					if (Data.canPlayNext)
+					{
+						_bigPlayBtn.visible = false;
+					}
+					else 
+					{
+						_bigPlayBtn.visible = true;
+					}
 					break;
 			}
 		}

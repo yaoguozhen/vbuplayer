@@ -147,6 +147,11 @@ package
 			_controlBarManager.rateBtnEnabled = false;
 			//DispatchEvents.STREAM_PLAY_COMPLETE();
 			_controlBarManager.previewVideo = false;
+			
+			if (Data.canPlayNext)
+			{
+				dispatchEvent(new Event("playNext"))
+			}
 		}
 		private function onUnPublish():void//直播停止发布
 		{

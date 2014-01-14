@@ -24,10 +24,12 @@ package data
 		
 		public static var videoRatio:Object="";//视频宽高比例
 		public static var autoPlay:Boolean = true;//是否自动播放
+		public static var autoPlayNext:Boolean = true;//是否自动播放下一集
 		
 		public static var fms:String;//fms地址
 		public static var streams:Object;//流名称
-		public static var previewStream:String
+		public static var previewStream:String//预览流名称
+		public static var nextVideo:String
 
 		public static var isFullScreen:Boolean = false;//是否是全屏		
 		
@@ -38,6 +40,17 @@ package data
 		public static var live:Boolean = false;//是否是直播
 		public static var skin:String;//皮肤地址
 		
+		public static function get canPlayNext():Boolean
+		{
+			if (Data.autoPlayNext)
+			{
+				if (Data.nextVideo && Data.nextVideo != "" && Data.nextVideo != "null" && Data.nextVideo != "undefined")
+				{
+					return true;
+				}
+			}
+			return false
+		}
 		public static function getData(obj:Stage):void
 		{
 			/***************** 真实数据 **********************/
