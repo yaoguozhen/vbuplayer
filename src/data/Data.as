@@ -30,12 +30,15 @@ package data
 		public static var streams:Object;//流名称
 		public static var previewStream:String//预览流名称
 		public static var nextVideo:String
+		public static var playURL:String
 
 		public static var isFullScreen:Boolean = false;//是否是全屏		
 		
 		//接收页面传来的参数
 		public static var uid:String;
+		public static var vid:String;
 		public static var api:String;
+		public static var submitURl:String;
 		public static var progressBarDraged:Boolean = true;//进度条是否可用
 		public static var live:Boolean = false;//是否是直播
 		public static var skin:String;//皮肤地址
@@ -68,15 +71,19 @@ package data
 			var _live = "false";*/
 			
 			var _skin ="videoPlayerSkin.swf";
-			var _uid = '12';
+			var _uid = 'yaoguozhen';
+			var _vid = '12';
 			var _api = "http://localhost/vbuplayer/api.asp";
+			var _submitURl = "http://localhost/vbuplayer/submit.asp";
 			var _autoPlay="true"
 			//var _progressBarDraged = "true";
 			//var _live = "false";
 
 		    YaoTrace.add(YaoTrace.ALL, "接收到 skin 值为：" + _skin);
-			YaoTrace.add(YaoTrace.ALL, "接收到 vid 值为：" + _uid);
+			YaoTrace.add(YaoTrace.ALL, "接收到 uid 值为：" + _uid);
+			YaoTrace.add(YaoTrace.ALL, "接收到 vid 值为：" + _vid);
 			YaoTrace.add(YaoTrace.ALL, "接收到 api 值为：" + _api);
+			YaoTrace.add(YaoTrace.ALL, "接收到 submitURl 值为：" + _api);
 			YaoTrace.add(YaoTrace.ALL, "接收到 autoPlay 值为：" + _autoPlay);
 			//YaoTrace.add(YaoTrace.ALL, "接收到 progressBarDraged 值为：" + _progressBarDraged);
 		    //YaoTrace.add(YaoTrace.ALL, "接收到 live 值为：" + _live);
@@ -89,9 +96,17 @@ package data
 			{
 				Data.uid = _uid;
 			}
+			if (_vid != null && _vid != undefined && _vid != "null" && _vid != "undefined")
+			{
+				Data.vid = _vid;
+			}
 			if (_api != null && _api != undefined && _api != "null" && _api != "undefined" && _api != "")
 			{
 				Data.api = _api;
+			}
+			if (_submitURl != null && _submitURl != undefined && _submitURl != "null" && _submitURl != "undefined" && _submitURl != "")
+			{
+				Data.submitURl = _submitURl;
 			}
 			if (_autoPlay != null && _api != _autoPlay && _autoPlay != "null" && _autoPlay != "undefined" && _autoPlay != "")
 			{

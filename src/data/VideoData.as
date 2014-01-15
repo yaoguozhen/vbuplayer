@@ -102,12 +102,12 @@ package data
 			removeListener()
 			dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
 		}
-		public function load(uid:String):void
+		public function load(vid:String):void
 		{
 			YaoTrace.add(YaoTrace.ALL, "开始获取视频数据，向 "+Data.api+" 发送 :"+Data.uid);
 			
 			var urlRequest:URLRequest = new URLRequest();
-			urlRequest.data = uid;
+			urlRequest.data = vid;
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.url = Data.api+"?random="+String(Math.random());
 			

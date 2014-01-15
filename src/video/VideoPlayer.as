@@ -122,7 +122,6 @@
 			{
 				var stream:String = getStream();
 				//dispacheVideoRatio(streamArray[2]);
-				trace(stream)
 				_tempStream.play(stream, 0);
 				//_tempStream.seek(_startTime);
 			}	
@@ -623,6 +622,11 @@
 			event.videoWidth = obj.width;
 			event.videoHeight = obj.height;
 			dispatchEvent(event);
+			
+			/*for (var item in obj)
+			{
+				trace(item+":"+obj[item])
+			}*/
 		}
 		public function onPlayStatus(obj:Object):void
 		{
@@ -660,7 +664,7 @@
 			
 		}
 		/****************************************************************************** 方法 **********************/
-		public function play(stream:Object,fms:String="",startRate:String="2",startTime:Number=0,bufferTime:Number=5000,live:Boolean=false):void
+		public function play(stream:Object,fms:String="",startRate:String="1",startTime:Number=0,bufferTime:Number=5000,live:Boolean=false):void
 		{
 			_play(stream,fms,startRate,startTime,bufferTime,live);
 		}

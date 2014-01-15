@@ -2,6 +2,7 @@ package
 {
 	import com.greensock.events.LoaderEvent;
 	import data.DispatchEvents;
+	import data.Submit;
 	import data.VideoData;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -64,11 +65,13 @@ package
 			_videoData.addEventListener(Event.COMPLETE, videoDataLoadComHandler);
 			_videoData.addEventListener(IOErrorEvent.IO_ERROR, videoDataLoadErrHandler);
 			
+			Data.playURL=encodeURI(String(this.loaderInfo.url))
 			Data.getData(stage);
 			
 			var checkRezult:String = CheckData.check();
 			if (checkRezult == "")
 			{
+				Submit.submitOnInit(Data.uid, Data.vid, Data.playURL);
 				initSkinLoader();
 				_skin.load(Data.skin+"?random="+Math.random());
 				//_skin.load(Data.skin);
@@ -124,7 +127,7 @@ package
 				_abc.scale(false, Data.videoRatio);
 				
 				_abc.alertMsg1 = " ";
-				_videoData.load(Data.uid);
+				_videoData.load(Data.vid);
 			}
 			else
 			{

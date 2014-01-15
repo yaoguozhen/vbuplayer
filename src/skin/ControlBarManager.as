@@ -47,7 +47,7 @@ package skin
 		private var _preview:MovieClip;
 		private var _alertMsgBg:MovieClip;
 
-		private var _currentRate:String="2";
+		private var _currentRate:String="1";
 		
 		private var _volNumBeforeClear:Number;
 		
