@@ -7,20 +7,22 @@ package
 	 */
 	public class CheckData 
 	{
-		public static function check():String
+		public static function check(obj:Object):Object
 		{
-			var msg:String = "";
-			if (Data.skin== null)
+			var msg:Object = new Object();
+			msg.alertMsg = "";
+			msg.errorMsg = "";
+			if (obj.skin==undefined)
 			{
-				msg+="参数 skin 必须被设置 | "
+				msg.errorMsg+="参数 skin 必须被设置 | "
 			}
-			if (Data.uid==null)
+			if (obj.submitURl==undefined)
 			{
-				msg+="参数 vid 必须被设置 | "
+				msg.alertMsg+="submitURl 参数没有被设置，将不能提交数据 "
 			}
-			if (Data.api==null)
+			if (obj.streams==undefined)
 			{
-				msg+="参数 api 必须被设置 | "
+				msg.errorMsg+="参数 streams 必须被设置 | "
 			}
 			return msg;
 		}

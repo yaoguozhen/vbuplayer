@@ -4,6 +4,7 @@ package data
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
+	import json.JSON2;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
 	
 	/**
@@ -29,15 +30,15 @@ package data
 		public static var fms:String;//fms地址
 		public static var streams:Object;//流名称
 		public static var previewStream:String//预览流名称
-		public static var nextVideo:String
+		public static var nextVideo:String=""
 		public static var playURL:String
 
 		public static var isFullScreen:Boolean = false;//是否是全屏		
 		
 		//接收页面传来的参数
-		public static var uid:String;
-		public static var vid:String;
-		public static var api:String;
+		//public static var uid:String;
+		//public static var vid:String;
+		//public static var api:String;
 		public static var submitURl:String;
 		public static var progressBarDraged:Boolean = true;//进度条是否可用
 		public static var live:Boolean = false;//是否是直播
@@ -47,14 +48,14 @@ package data
 		{
 			if (Data.autoPlayNext)
 			{
-				if (Data.nextVideo && Data.nextVideo != "" && Data.nextVideo != "null" && Data.nextVideo != "undefined")
+				if (Data.nextVideo!="")
 				{
 					return true;
 				}
 			}
 			return false
 		}
-		public static function getData(obj:Stage):void
+		public static function getData(obj:Stage):Boolean
 		{
 			/***************** 真实数据 **********************/
 			/*var _skin = obj.loaderInfo.parameters.skin;
@@ -69,68 +70,42 @@ package data
 			var _api = "http://115.28.6.41/VideoControl/library/VideoLibrary.php";
 			var _progressBarDraged = "false";
 			var _live = "false";*/
+			Data.playURL=encodeURI(String(obj.loaderInfo.url))
+			var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://www.wwww.w.www.."}'
+			YaoTrace.add(YaoTrace.ALL, "接收到 data 值为：" + data);
 			
-			var _skin ="videoPlayerSkin.swf";
-			var _uid = 'yaoguozhen';
-			var _vid = '12';
-			var _api = "http://localhost/vbuplayer/api.asp";
-			var _submitURl = "http://localhost/vbuplayer/submit.asp";
-			var _autoPlay="true"
-			//var _progressBarDraged = "true";
-			//var _live = "false";
-
-		    YaoTrace.add(YaoTrace.ALL, "接收到 skin 值为：" + _skin);
-			YaoTrace.add(YaoTrace.ALL, "接收到 uid 值为：" + _uid);
-			YaoTrace.add(YaoTrace.ALL, "接收到 vid 值为：" + _vid);
-			YaoTrace.add(YaoTrace.ALL, "接收到 api 值为：" + _api);
-			YaoTrace.add(YaoTrace.ALL, "接收到 submitURl 值为：" + _api);
-			YaoTrace.add(YaoTrace.ALL, "接收到 autoPlay 值为：" + _autoPlay);
-			//YaoTrace.add(YaoTrace.ALL, "接收到 progressBarDraged 值为：" + _progressBarDraged);
-		    //YaoTrace.add(YaoTrace.ALL, "接收到 live 值为：" + _live);
-			
-			if (_skin != null && _skin != undefined && _skin != "null" && _skin != "undefined" && _skin != "")
+			var dataObject:Object = JSON2.decode(data);
+			var rezult:Object = CheckData.check(dataObject);
+			if (rezult.errorMsg == "")
 			{
-				Data.skin = _skin;
-			}
-			if (_uid != null && _uid != undefined && _uid != "null" && _uid != "undefined")
-			{
-				Data.uid = _uid;
-			}
-			if (_vid != null && _vid != undefined && _vid != "null" && _vid != "undefined")
-			{
-				Data.vid = _vid;
-			}
-			if (_api != null && _api != undefined && _api != "null" && _api != "undefined" && _api != "")
-			{
-				Data.api = _api;
-			}
-			if (_submitURl != null && _submitURl != undefined && _submitURl != "null" && _submitURl != "undefined" && _submitURl != "")
-			{
-				Data.submitURl = _submitURl;
-			}
-			if (_autoPlay != null && _api != _autoPlay && _autoPlay != "null" && _autoPlay != "undefined" && _autoPlay != "")
-			{
-				if (_autoPlay == "false")
+				Data.skin = dataObject.skin;
+				Data.submitURl = dataObject.submitURl;
+				if (dataObject.fms == undefined)
 				{
-					Data.autoPlay = false;
+					Data.fms = "";
+				}
+				else
+				{
+					Data.fms = dataObject.fms;
+				}
+				Data.streams = dataObject.streams;
+				Data.nextVideo = dataObject.nextStream
+				if (dataObject.nextVideo != undefined)
+				{
+					Data.nextVideo = dataObject.nextVideo;
+				}
+				if (rezult.errorMsg != "")
+				{
+					YaoTrace.add(YaoTrace.ERROR, rezult.alertMsg);
 				}
 			}
-			/*if (_live == "true")
-			{
-				Data.live = true;
-			}
 			else
 			{
-				Data.live = false;
+				YaoTrace.add(YaoTrace.ERROR, rezult.errorMsg);
+				return false
+				
 			}
-			if (_progressBarDraged == "false")
-			{
-				Data.progressBarDraged = false;
-			}
-			else
-			{
-				Data.progressBarDraged = true;
-			}*/
+			return true
 		}
 		
 	}

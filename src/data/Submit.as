@@ -8,6 +8,7 @@ package data
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
+	import flash.utils.getTimer;
 	/**
 	 * ...
 	 * @author yaoguozhen
@@ -49,7 +50,7 @@ package data
 		}
 		private static function getUUID():String
 		{
-			return MD5.hash(Data.uid + Data.vid + getDisTime());
+			return MD5.hash(String(getTimer())+String(Math.random())+String(Math.random()) + getDisTime());
 		}
 		private static function getDisTime():String
 		{
@@ -78,7 +79,7 @@ package data
 			submit(urlVar)
 		}
 		/**
-		* 1 连接fms服务器失败
+		* 1 连接服务器失败
 		* 2 连接被拒绝
 		* 3 某个码率的视频不存在
 		* 4 皮肤文件加载失败

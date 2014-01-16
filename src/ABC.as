@@ -12,6 +12,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
+	import flash.net.URLRequest;
 	import flash.utils.Timer;
 	import skin.ControlBarManager;
 	import skin.events.ChangeLightEvent;
@@ -34,6 +35,7 @@ package
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
 	import fl.motion.ColorMatrix;
 	import flash.filters.ColorMatrixFilter;
+	import flash.net.navigateToURL
 	/**
 	 * ...
 	 * @author t
@@ -151,7 +153,7 @@ package
 			
 			if (Data.canPlayNext)
 			{
-				dispatchEvent(new Event("playNext"))
+				navigateToURL(new URLRequest(Data.nextVideo), "_blank");
 			}
 		}
 		private function onUnPublish():void//直播停止发布

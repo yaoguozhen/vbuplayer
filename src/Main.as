@@ -3,7 +3,7 @@ package
 	import com.greensock.events.LoaderEvent;
 	import data.DispatchEvents;
 	import data.Submit;
-	import data.VideoData;
+	//import data.VideoData;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -27,7 +27,7 @@ package
 		private var _skin:Skin;
 		private var _videoPlayer:AdvVideoPlayer;
 		private var _abc:ABC;
-		private var _videoData:VideoData;
+		//private var _videoData:VideoData;
 		
 		public function Main():void 
 		{
@@ -60,27 +60,21 @@ package
 			DispatchEvents.init(this);
 			
 			_videoPlayer = new AdvVideoPlayer();
-			
+			/*
 			_videoData = new VideoData();
 			_videoData.addEventListener(Event.COMPLETE, videoDataLoadComHandler);
 			_videoData.addEventListener(IOErrorEvent.IO_ERROR, videoDataLoadErrHandler);
-			
-			Data.playURL=encodeURI(String(this.loaderInfo.url))
-			Data.getData(stage);
-			
-			var checkRezult:String = CheckData.check();
-			if (checkRezult == "")
+			*/
+			var rezult = Data.getData(stage);
+			if (rezult)
 			{
 				Submit.submitOnInit();
 				initSkinLoader();
 				_skin.load(Data.skin+"?random="+Math.random());
 				//_skin.load(Data.skin);
 			}
-			else
-			{
-				YaoTrace.add(YaoTrace.ERROR, checkRezult);
-			}
 		}
+		/*
 		private function videoDataLoadComHandler(evn:Event):void
 		{
 			if (_videoData.analyseSuccess)
@@ -98,6 +92,7 @@ package
 			YaoTrace.add(YaoTrace.ERROR, "视频信息获取失败");
 			_abc.onVideoDateLoadError("获取视频信息出错")
 		}
+		*/
 		private function initSkinLoader():void
 		{
 			_skin = new Skin();
@@ -123,11 +118,11 @@ package
 				
 				_abc = new ABC();
 				_abc.addObject(_videoPlayer, _skin, stage);
-				_abc.addEventListener("playNext",playNextHandler)
 				_abc.scale(false, Data.videoRatio);
 				
 				_abc.alertMsg1 = " ";
-				_videoData.load(Data.vid);
+				v_start(Data.streams, Data.fms);
+				//_videoData.load(Data.vid);
 			}
 			else
 			{
@@ -138,10 +133,6 @@ package
 		private function skinLoadErrHandler(evn:Event):void
 		{
 			Submit.submitOnPlayFailed("4")
-		}
-		private function playNextHandler(evn:Event):void
-		{
-			_videoData.load(Data.nextVideo);
 		}
 		private function resizeHandler(evn:Event):void
 		{

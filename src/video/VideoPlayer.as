@@ -280,11 +280,13 @@
 				    break;
 				case "NetStream.Buffer.Flush":
 				    _flush = true;
+					onBufferFlush()
 				    break;	
 				case "NetStream.Unpause.Notify":
 				    break;	
 				case "NetStream.Play.Stop":
 				    _stop = true;
+					onPlayStop()
 				    break;	
 				case "NetStream.Play.StreamNotFound":
 				case "NetStream.Failed":
@@ -381,6 +383,14 @@
 			}
 		}
 		private function onBufferFlush():void
+		{
+			checkFinishOnNotUseFms();
+		}
+		private function onPlayStop():void
+		{
+			checkFinishOnNotUseFms();
+		}
+		private function checkFinishOnNotUseFms():void
 		{
 			if (!_useFms)
 			{
