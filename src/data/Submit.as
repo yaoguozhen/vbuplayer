@@ -47,9 +47,9 @@ package data
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityHandler);
 			urlLoader.load(urlRequest);
 		}
-		private static function getUUID(uid:String,vid:String):String
+		private static function getUUID():String
 		{
-			return MD5.hash(uid+vid+getDisTime())
+			return MD5.hash(Data.uid + Data.vid + getDisTime());
 		}
 		private static function getDisTime():String
 		{
@@ -65,13 +65,34 @@ package data
 			}
 			YaoTrace.add(YaoTrace.ALL, "提交信息:"+msg);
 		}
-		public static function submitOnInit(uid:String,vid:String,playUrl:String):void
+		public static function submitOnInit():void
 		{
 			var urlVar:URLVariables = new URLVariables()
-			urlVar.type = "playinit";
-			urlVar.uuid = getUUID(uid, vid)
+			urlVar.type = "play_init";
+			urlVar.uuid = getUUID()
+			urlVar.playurl = Data.playURL
+			
 			urlVar.playtime = getDisTime()
-			urlVar.playurl = playUrl
+			
+			addToYaoTrace(urlVar)
+			submit(urlVar)
+		}
+		/**
+		* 1 连接fms服务器失败
+		* 2 连接被拒绝
+		* 3 某个码率的视频不存在
+		* 4 皮肤文件加载失败
+		* 5 获取视频信息失败
+		* 6 视频信息格式不正确
+		**/
+		public static function submitOnPlayFailed(errorCode:String):void
+		{
+			var urlVar:URLVariables = new URLVariables()
+			urlVar.type = "play_fail";
+			urlVar.uuid = getUUID()
+			urlVar.playurl = Data.playURL
+			
+			urlVar.errorcode = errorCode
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)

@@ -28,8 +28,10 @@ package
 		private var _closeConnectionTimer:Timer
 		private var _showVideoTimer:Timer
 		private var _path:MovieClip
-		private var _totalTime:Number = 0;
-		private var _connecting:Boolean=false
+		private var _totalTime:Number = -1;
+		private var _connecting:Boolean = false
+		private var _metaData:Object
+		private var _useFms:Boolean = true;
 		
 		public function VideoPreview():void 
 		{
@@ -53,18 +55,19 @@ package
 			_closeConnectionTimer.reset();
 			if (_netConnetction)
 			{
-				_netConnetction.close();
+				//_netConnetction.close();
 			}
 			if (_netStream)
 			{
 				_netStream.close()
 			}
 			_gotoTime = 0;
-			_netStream = null;
+			//_netStream = null;
 			if (_video)
 			{
 				_video.clear()
 			}
+			clear();
 		}
 		private function showVideoTimerHandler(evn:TimerEvent):void
 		{
@@ -98,9 +101,21 @@ package
 		{
 			_netStream = new NetStream(nc);
 			_netStream.client = this;
+			_netStream.addEventListener(NetStatusEvent.NET_STATUS, nsStatusHandler);
 			//_netStream.bufferTime = bufferTime;
 			_netStream.soundTransform=new SoundTransform(0)
 			_video.attachNetStream(_netStream);
+		}
+		private function nsStatusHandler(evn:NetStatusEvent):void
+		{
+			var msg:String = evn.info.code;
+			trace("预览："+msg)
+			switch (msg) 
+			{ 
+				case "NetStream.Seek.InvalidTime":	
+					advSeek(_netStream,evn.info.details)
+				    break;
+			}
 		}
 		private function onConnectSuccess():void
 		{
@@ -111,6 +126,7 @@ package
 		{
 			_connecting = false;
 			var msg:String = evn.info.code;
+			trace("预览："+msg)
 			switch (msg) 
 			{ 
 				case "NetConnection.Connect.Success":
@@ -170,10 +186,51 @@ package
 			setContainerPosition()
 			gotoPlay(_totalTime*_path.mouseX/_path.width)
 		}
+		private function advSeek(stream:NetStream,time:Number):void
+		{
+			if (_useFms)
+			{
+				stream.seek(time);
+			}
+			else
+			{
+				if (_metaData)
+				{
+					var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
+					_netStream.play(_stream + "?start=" + theKeyFrame)
+				}
+			}
+		}
+		private function getPosFromTime(param1:Array, param2:Array, param3:Number) : Number
+        {
+            var repos = param2[param2.length - 1];
+            if (param3 <= param1[0])
+            {
+                return 0;
+            }
+            var _loc_4 = 0;
+            while (_loc_4 <= param1.length - 2)
+            {
+                
+                var prePos = param1[_loc_4];
+                var nextPos = param1[(_loc_4 + 1)];
+                if (param3 >= prePos && param3 < nextPos)
+                {
+                    repos = param2[_loc_4];
+                    break;
+                }
+                _loc_4 = _loc_4 + 1;
+            }
+            return repos;
+        }// end function
 		public function onMetaData(obj:Object):void
 		{
-			_totalTime = obj.duration;
-			scale(new Rectangle(0,0,_container.width,_container.height),obj.width/obj.height)
+			if (_totalTime == -1)
+			{
+				_metaData = obj;
+				_totalTime = _metaData.duration;
+				scale(new Rectangle(0, 0, _container.width, _container.height), _metaData.width / _metaData.height)
+			}
 		}
 		public function onPlayStatus(obj:Object):void{}
 		public function onBWDone():void{}
@@ -193,10 +250,9 @@ package
 		{	
 			_closeConnectionTimer.reset()
 			_gotoTime = second;
-
 			if (_netConnetction.connected)
 			{
-				_netStream.seek(_gotoTime)
+				advSeek(_netStream,_gotoTime)
 			}
 			else
 			{
@@ -216,9 +272,14 @@ package
 		public function setVideo(fms:String, stream:String):void
 		{
 			_fms = fms;
+			if (_fms == "")
+			{
+				_fms = null;
+                _useFms = false;			
+			}
 			_stream = stream;
 		}
-		public function set active(b):void
+		public function set active(b:Boolean):void
 		{
 			if (b)
 			{

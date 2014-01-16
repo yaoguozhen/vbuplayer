@@ -2,6 +2,7 @@ package
 {
 	import data.Data;
 	import data.DispatchEvents;
+	import data.Submit;
 	import flash.display.DisplayObject;
 	import flash.display.Stage;
 	import flash.events.Event;
@@ -235,7 +236,7 @@ package
 		}
 		private function onMetaDataHandler(evn:OnMetaDataEvent):void
 		{
-			if (evn.videoWidth != undefined && evn.videoHeight != undefined)
+			if (evn.videoWidth != 0 && evn.videoHeight != 0)
 			{
 				YaoTrace.add(YaoTrace.ALL,"元数据中有视频长宽值，使用元数据的长宽值计算")
 				Data.videoRatio = evn.videoWidth / evn.videoHeight;
@@ -261,6 +262,7 @@ package
 		private function streamNotFoundHandler2(evn:StreamNotFountEvent):void
 		{
 			_controlBarManager.unActiveRatePanelItem(evn.rate);
+			Submit.submitOnPlayFailed("3")
 		}
 		private function netStreamChangeHandler(evn:NetStreamEvent)
 		{
@@ -321,7 +323,11 @@ package
 				case "NetConnection.ReConnect.Failed":
 					alertMsg1 = "服务器连接失败";
 					_hideLastPlayTimeAlertTimer.reset();
+					Submit.submitOnPlayFailed("1")
 					break;
+				case "NetConnection.Connect.Rejected":
+					Submit.submitOnPlayFailed("2")
+				    break;
 				case "NetConnection.Connect.Success":
 					/*if (Data.live)
 					{

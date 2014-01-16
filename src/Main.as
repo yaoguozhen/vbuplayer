@@ -71,7 +71,7 @@ package
 			var checkRezult:String = CheckData.check();
 			if (checkRezult == "")
 			{
-				Submit.submitOnInit(Data.uid, Data.vid, Data.playURL);
+				Submit.submitOnInit();
 				initSkinLoader();
 				_skin.load(Data.skin+"?random="+Math.random());
 				//_skin.load(Data.skin);
@@ -137,7 +137,7 @@ package
 		}
 		private function skinLoadErrHandler(evn:Event):void
 		{
-			
+			Submit.submitOnPlayFailed("4")
 		}
 		private function playNextHandler(evn:Event):void
 		{

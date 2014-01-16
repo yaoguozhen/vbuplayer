@@ -58,30 +58,28 @@ package data
 				if (jsonObject)
 				{
 					Data.fms = jsonObject.fms;
-					if (Data.fms == "")
+					if (Data.fms == null || Data.fms == undefined)
 					{
-						YaoTrace.add(YaoTrace.ERROR, "视频信息json数据中fms参数不可为空！");
+						Data.fms=""
+						//YaoTrace.add(YaoTrace.ERROR, "视频信息json数据中fms参数不可为空！");
+						analyseSuccess = true;
+					}
+					Data.nextVideo = String(jsonObject.nextStream);
+					Data.streams = jsonObject.streams;
+					if (Data.streams.length == 0)
+					{
+						YaoTrace.add(YaoTrace.ERROR, "视频信息json数据中stream参数中流的数量必须不为0！");
 						analyseSuccess = false;
 					}
 					else
 					{
-						Data.nextVideo = String(jsonObject.nextStream);
-						Data.streams = jsonObject.streams;
-						if (Data.streams.length == 0)
+						var n = Data.streams.length;
+						for (var i:uint = 0; i < n; i++)
 						{
-							YaoTrace.add(YaoTrace.ERROR, "视频信息json数据中stream参数中流的数量必须不为0！");
-							analyseSuccess = false;
-						}
-						else
-						{
-							var n = Data.streams.length;
-							for (var i:uint = 0; i < n; i++)
+							if (Data.streams[i].type == "0")
 							{
-								if (Data.streams[i].type == "0")
-								{
-									Data.previewStream = String(Data.streams[i].stream);
-									break
-								}
+								Data.previewStream = String(Data.streams[i].stream);
+								break
 							}
 						}
 					}

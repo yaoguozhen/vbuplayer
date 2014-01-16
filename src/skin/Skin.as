@@ -73,7 +73,12 @@ package skin
 		}
 		private function securityErrHandler(evn:SecurityErrorEvent):void
 		{
-			YaoTrace.add(YaoTrace.ERROR, "跨域加载皮肤文件出错，错误信息："+evn.text);
+			YaoTrace.add(YaoTrace.ERROR, "跨域加载皮肤文件出错，错误信息：" + evn.text);
+			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, loadComHandler);
+			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, loadErrorHandler);
+			_loader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrHandler);
+			
+			dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
 		}
 		/**
 		 * 加载失败

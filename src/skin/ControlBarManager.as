@@ -317,6 +317,7 @@ package skin
 		}
 		private function progressBarChangeHandler(evn:Event):void
 		{
+			trace("xxxxxx:"+playPer)
 			var event:ProgressChangeEvent = new ProgressChangeEvent(ProgressChangeEvent.CHANGE);
 			event.per = playPer;
 			dispatchEvent(event);
@@ -353,6 +354,7 @@ package skin
 			if ((_controlBar.progressBar.path.mouseX / _controlBar.progressBar.width) < _controlBar.progressBar.loadingBar.scaleX)
 			{
 				playPer = _controlBar.progressBar.path.mouseX / _controlBar.progressBar.width;
+				
 				dispatchEvent(new Event("progressBarChange"));
 			}
 		}

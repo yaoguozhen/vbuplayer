@@ -22,7 +22,6 @@
 	import video.events.PlayStatusEvent;
 	import video.events.StreamNotFountEvent;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
-	
 	/**
 	 * ...
 	 * @author yaoguozhen
@@ -37,12 +36,13 @@
 		private var _tempStream:NetStream;
 		private var _netConnetction:NetConnection;
 		
-		private var _totalTime:Number = 0;//视频总时间
+		private var _totalTime:Number = -1;//视频总时间
 		private var _currentTime:Number = 0;//当前时间
 		
 		private var _beforChangeRateTime:Number = 0;
 		private var _videoCanAttachNetStream:Boolean = true;
 		private var _connectSuccess:Boolean = false;//连接是否成功了
+		private var _metaData:Object
 		
 		private var _playStatus:String = "";
 		private var _useFms:Boolean = false;//是否使用fms
@@ -61,6 +61,7 @@
 		
 		private var _stop:Boolean = false;
 		private var _flush:Boolean = false;
+		private var _bufferEmpty:Boolean=true
 		private var _firstOnStart:Boolean = true;
 		private var _live:Boolean = false;
 		private var _currentReconnectCount:uint = 0;
@@ -156,11 +157,11 @@
 		{
 			if (_tempStream)
 			{
-				_tempStream.seek(_beforChangeRateTime);
+				advSeek(_tempStream, _beforChangeRateTime);
 			}
 			if (_netStream)
 			{
-				_netStream.seek(_beforChangeRateTime);
+				advSeek(_netStream, _beforChangeRateTime);
 			}
 		}
 		private function reConnect():void
@@ -245,6 +246,7 @@
 					bufferFullCount++;
 				    _flush = false;
 					_buffering = false;
+					_bufferEmpty = false;
 					_bufferingTimer.reset();
 					
 					if (_tempStream)
@@ -258,7 +260,7 @@
 					}
 					if (_startTime != 0)
 					{
-						_netStream.seek(_startTime);
+						advSeek(_netStream,_startTime)
 						_startTime = 0;
 					}
 				    break;
@@ -267,13 +269,14 @@
 				    break;
 				case "NetStream.Seek.Notify":
 					_flush = false;
+					_bufferEmpty = false;
 					_playingTimer.start();
 				    break;
 				case "NetStream.Seek.Complete":
 					_videoCanAttachNetStream = true;
 					break;
 				case "NetStream.Seek.InvalidTime":	
-					_netStream.seek(evn.info.details);
+					advSeek(_netStream,evn.info.details)
 				    break;
 				case "NetStream.Buffer.Flush":
 				    _flush = true;
@@ -309,7 +312,7 @@
 			if (!_useFms)
 			{
 				_loadingTimer.reset()
-				_loadingTimer.start();
+				//_loadingTimer.start();
 			}
 			if (_videoCanAttachNetStream == false)
 			{
@@ -362,6 +365,7 @@
 		}
 		private function onBufferEmpty():void
 		{			
+			_bufferEmpty = true;
 			if (!_useFms)
 			{
 				if (_flush && _stop)
@@ -374,6 +378,16 @@
 			{
 				_buffering = true;
 				_bufferingTimer.start();
+			}
+		}
+		private function onBufferFlush():void
+		{
+			if (!_useFms)
+			{
+				if (_flush && _stop && _bufferEmpty)
+				{
+					playComplete();
+				}
 			}
 		}
 		private function initTimer():void
@@ -402,21 +416,25 @@
 		 //加载中
 		private function loadingHandler(evn:Event):void
 		{
-			var per:Number = _netStream.bytesLoaded / _netStream.bytesTotal;
-			
-			var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
-			event.percent = per;
-			dispatchEvent(event);
+			if (_netStream)
+			{
+				var per:Number = _netStream.bytesLoaded / _netStream.bytesTotal;
+				
+				var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
+				event.percent = per;
+				dispatchEvent(event);
+			}
 		}
 		private function playingTimerHandler(evn:TimerEvent):void
 		{
-			//trace(_netStream.info.currentBytesPerSecond/1024)
-			
 			if (_netStream)
 			{
-				var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
-				event.currentTime = _netStream.time*1000;
-				dispatchEvent(event);
+				if (_netStream.time > 1)
+				{
+					var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
+					event.currentTime = _netStream.time*1000;
+					dispatchEvent(event);
+				}
 			}
 			
 		}
@@ -475,7 +493,7 @@
 			if (_connectSuccess)
 			{
 				_playingTimer.stop();
-				_netStream.seek(time);
+				advSeek(_netStream,time)
 			}
 		}
 		private function _resume():void
@@ -532,7 +550,7 @@
 			clearNetConnection();
 			clearNetStream();
 			
-			_totalTime = 0;
+			_totalTime = -1;
 			bufferFullCount = 0;
 			_firstOnStart = true;
 			_connectSuccess = false;
@@ -613,20 +631,70 @@
 				}
 			}
 		}
+		private function advSeek(stream:NetStream,time:Number):void
+		{
+			if (_useFms)
+			{
+				stream.seek(time);
+			}
+			else
+			{
+				var currentStream:String = getStream();
+				var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
+				stream.play(currentStream+"?start="+theKeyFrame)
+			}
+		}
+		private function getPosFromTime(param1:Array, param2:Array, param3:Number) : Number
+        {
+            var repos = param2[param2.length - 1];
+            if (param3 <= param1[0])
+            {
+                return 0;
+            }
+            var _loc_4 = 0;
+            while (_loc_4 <= param1.length - 2)
+            {
+                
+                var prePos = param1[_loc_4];
+                var nextPos = param1[(_loc_4 + 1)];
+                if (param3 >= prePos && param3 < nextPos)
+                {
+                    repos = param2[_loc_4];
+                    break;
+                }
+                _loc_4 = _loc_4 + 1;
+            }
+            return repos;
+        }// end function
+
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		public function onMetaData(obj:Object):void
 		{
-			_totalTime = obj.duration*1000;
-			
-			var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
-			event.videoWidth = obj.width;
-			event.videoHeight = obj.height;
-			dispatchEvent(event);
-			
-			/*for (var item in obj)
+			if (_totalTime == -1)
 			{
-				trace(item+":"+obj[item])
-			}*/
+				_metaData = obj;
+				_totalTime = _metaData.duration * 1000;
+				var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
+				if (_metaData.width != undefined && _metaData.height != undefined)
+				{
+					event.videoWidth = _metaData.width;
+					event.videoHeight = _metaData.height;
+				}
+				else
+				{
+					event.videoWidth = 0;
+					event.videoHeight = 0;
+				}
+				dispatchEvent(event);
+				//trace("a:"+_metaData.hasKeyframes)
+				/*for (var item in _metaData)
+				{
+					trace(item+":"+_metaData[item])
+				}*/
+				//trace(_metaData.keyframes.times)
+				//trace(_metaData.keyframes.filepositions)
+				//trace(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions,15))
+			}
 		}
 		public function onPlayStatus(obj:Object):void
 		{
