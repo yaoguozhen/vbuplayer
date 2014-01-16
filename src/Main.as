@@ -73,6 +73,10 @@ package
 				_skin.load(Data.skin+"?random="+Math.random());
 				//_skin.load(Data.skin);
 			}
+			else
+			{
+				Submit.submitOnPlayFailed("1")
+			}
 		}
 		/*
 		private function videoDataLoadComHandler(evn:Event):void
@@ -132,7 +136,7 @@ package
 		}
 		private function skinLoadErrHandler(evn:Event):void
 		{
-			Submit.submitOnPlayFailed("4")
+			Submit.submitOnPlayFailed("5")
 		}
 		private function resizeHandler(evn:Event):void
 		{

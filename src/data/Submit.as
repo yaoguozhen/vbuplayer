@@ -79,14 +79,13 @@ package data
 			submit(urlVar)
 		}
 		/**
-		* 1 连接服务器失败
-		* 2 连接被拒绝
-		* 3 某个码率的视频不存在
-		* 4 皮肤文件加载失败
-		* 5 获取视频信息失败
-		* 6 视频信息格式不正确
+		* 1 视频信息不正确
+		* 2 连接服务器失败
+		* 3 某个码率的视频播放没有找到
+		* 4 某个码率的视频由于列表之外的原因播放失败
+		* 5 皮肤文件加载失败
 		**/
-		public static function submitOnPlayFailed(errorCode:String):void
+		public static function submitOnPlayFailed1(errorCode:String):void
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_fail";

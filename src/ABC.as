@@ -273,6 +273,9 @@ package
 				case "NetStream.Play.Start":
 					_controlBarManager.rateBtnEnabled = true;
 					break;
+				case "NetStream.Play.Failed":
+					Submit.submitOnPlayFailed("4")
+					break;	
 				case "NetStream.Buffer.Full":
 					_videoPlayer.visible = true;
 					if (!Data.live)
@@ -325,7 +328,7 @@ package
 				case "NetConnection.ReConnect.Failed":
 					alertMsg1 = "服务器连接失败";
 					_hideLastPlayTimeAlertTimer.reset();
-					Submit.submitOnPlayFailed("1")
+					Submit.submitOnPlayFailed("2")
 					break;
 				case "NetConnection.Connect.Rejected":
 					Submit.submitOnPlayFailed("2")
