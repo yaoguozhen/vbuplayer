@@ -58,7 +58,7 @@ package
 			stage.addEventListener(Event.RESIZE, resizeHandler);
 			
 			DispatchEvents.init(this);
-			
+			Submit.creatUUID()
 			_videoPlayer = new AdvVideoPlayer();
 			/*
 			_videoData = new VideoData();

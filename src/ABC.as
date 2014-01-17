@@ -62,6 +62,8 @@ package
 		private var _firstBufferUsedTime:Number = 0;//第一次缓冲用时
 		private var _hasDraged:Boolean = false;
 		private var _meteData:Object;
+		private var _loadingStartTime:uint = -1;
+		private var _loadingUsedTime:uint = 0;
 		
 		public function ABC() :void
 		{
@@ -102,6 +104,7 @@ package
 			_videoPlayer.addEventListener(RateEvent.RATE_CHANGE, videoPlayerRateChangeHandler);
 			_videoPlayer.addEventListener("streamNotFound", streamNotFoundHandler);//所有的流都没有找到
 			_videoPlayer.addEventListener("videoRatioChanged", videoRatioChangedHandler);
+			_videoPlayer.addEventListener("loadingComplete", loadingCompleteHandler);
 			_videoPlayer.addEventListener(StreamNotFountEvent.STREAM_NOT_FOUNT,streamNotFoundHandler2)//某个流没有找到
 		}
 		private function setSkin(s:Skin):void
@@ -162,8 +165,11 @@ package
 			//DispatchEvents.STREAM_PLAY_COMPLETE();
 			_controlBarManager.previewVideo = false;
 			
-			_dragStartTime = -1
-		    _bufferEmptyStartTime = -1
+			_dragStartTime = -1;
+		    _bufferEmptyStartTime = -1;
+			Submit.submitByteLoaded(_videoPlayer.byteLoaded, _loadingUsedTime);
+			_loadingUsedTime = 0;
+			_loadingStartTime = -1;
 			
 			if (Data.canPlayNext)
 			{
@@ -192,7 +198,8 @@ package
 			_controlBarManager.rateBtnEnabled = false;
 			_controlBarManager.setVideoStatus = Data.CLOSED;
 			_controlBarManager.bigPlayBtnType = "connect";
-			alertMsg1 = "链接断开，请点击播放按钮重试";
+			//alertMsg1 = "链接断开，请点击播放按钮重试";
+			alertMsg1 = "";
 			_hideLastPlayTimeAlertTimer.reset();
 			_bufferEmptyStartTime = -1;
 			_dragStartTime = -1;
@@ -251,6 +258,11 @@ package
 		private function loadingHandler(evn:LoadingEvent):void
 		{
 			_controlBarManager.loadPer = evn.percent;
+		}
+		private function loadingCompleteHandler(evn:Event):void
+		{
+			_loadingUsedTime += getTimer() - _loadingStartTime;
+			_loadingStartTime = -1;
 		}
 		private function getDataRate(obj:Object):uint
 		{
@@ -329,6 +341,7 @@ package
 			{
 				case "NetStream.Play.Start":
 					_controlBarManager.rateBtnEnabled = true;
+					_loadingStartTime = getTimer();
 					break;
 				case "NetStream.Play.Failed":
 					Submit.submitOnPlayFailed("4")
@@ -375,6 +388,7 @@ package
 					{
 						//trace("广告开始计时")
 					}
+					//_loadingStartTime=getTimer()
 					_bufferEmptyStartTime=getTimer()
 					break;
 				case "NetStream.Play.UnpublishNotify":
@@ -479,7 +493,8 @@ package
 			_hasDraged = true;
 			resumeSomePram();
 			_bufferEmptyStartTime = -1;
-			_dragStartTime=getTimer()
+			_loadingStartTime = getTimer();
+			_dragStartTime = getTimer();
 			_videoPlayer.seek(evn.per*_videoPlayer.totalTime/1000);
 		}
 		private function resumeSomePram():void

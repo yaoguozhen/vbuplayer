@@ -3,6 +3,7 @@
 	import data.Data;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.events.NetStatusEvent;
 	import flash.events.TimerEvent;
 	import flash.media.SoundMixer;
@@ -71,9 +72,10 @@
 		private var _buffering:Boolean;
 		private var _playCount:uint = 0;
 		private var _videoRatio:Number;
+		private var _lastByteLoaded:uint = 0
 		
 		public var bufferFullCount:uint = 0;//缓冲区满的次数
-		
+		public var byteLoaded:uint = 0;
 		
 		public function VideoPlayer():void
 		{
@@ -314,7 +316,7 @@
 			if (!_useFms)
 			{
 				_loadingTimer.reset()
-				//_loadingTimer.start();
+				_loadingTimer.start();
 			}
 			if (_videoCanAttachNetStream == false)
 			{
@@ -331,7 +333,6 @@
 			_buffering = true;
 			
 			_lastPlayRate = _currentRate;
-			
 			if (_firstOnStart)
 			{	
 				_firstOnStart = false;
@@ -353,6 +354,7 @@
 			_buffering = false;
 
 			bufferFullCount = 0;
+			_lastByteLoaded = 0;
 			
 			var event:PlayStatusEvent = new PlayStatusEvent(PlayStatusEvent.CHANGE);
 			if (_live)
@@ -364,6 +366,8 @@
 				event.status = Data.COMPLETE;
 			}
 			dispatchEvent(event);
+			
+			_netConnetction.close();
 		}
 		private function onBufferEmpty():void
 		{			
@@ -379,7 +383,10 @@
 			if (_playStatus != Data.COMPLETE)
 			{
 				_buffering = true;
-				_bufferingTimer.start();
+				if (_bufferingTimer)
+				{
+					_bufferingTimer.start();
+				}
 			}
 		}
 		private function onBufferFlush():void
@@ -428,11 +435,21 @@
 		{
 			if (_netStream)
 			{
-				var per:Number = _netStream.bytesLoaded / _netStream.bytesTotal;
+				byteLoaded += _netStream.bytesLoaded - _lastByteLoaded;
+				_lastByteLoaded = _netStream.bytesLoaded;
+				if (_netStream.bytesLoaded < _netStream.bytesTotal)
+				{
+					var per:Number = _netStream.bytesLoaded / _netStream.bytesTotal;
 				
-				var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
-				event.percent = per;
-				dispatchEvent(event);
+					var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
+					event.percent = per;
+					dispatchEvent(event);
+				}
+				else
+				{
+					_loadingTimer.reset();
+					dispatchEvent(new Event("loadingComplete"))
+				}
 			}
 		}
 		private function playingTimerHandler(evn:TimerEvent):void
@@ -441,9 +458,12 @@
 			{
 				if (_netStream.time > 1)
 				{
-					var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
-					event.currentTime = _netStream.time * 1000;
-					dispatchEvent(event);
+					if (_netStream.time * 1000 <= totalTime)
+					{
+						var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
+						event.currentTime = _netStream.time * 1000;
+						dispatchEvent(event);
+					}
 				}
 			}
 			
@@ -569,6 +589,7 @@
 			_stop = false;
 			_flush = false;
 			_buffering = false;
+			//_lastByteLoaded = 0;
 			
 			_video.smoothing = false;
 			_video.clear();
@@ -601,6 +622,7 @@
 				_checkBufferLengthTimer.removeEventListener(TimerEvent.TIMER, checkBufferLengthTimerHandler);
 				_checkBufferLengthTimer = null;
 			}
+			dispatchEvent(new Event("loadingComplete"))
 		}
 		private function _play(stream:Object,fms:String,startRate:String,startTime:Number,bufferTime:Number,live:Boolean):void
 		{
@@ -649,6 +671,7 @@
 			}
 			else
 			{
+				_lastByteLoaded = 0;
 				var currentStream:String = getStream();
 				var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
 				stream.play(currentStream+"?start="+theKeyFrame)

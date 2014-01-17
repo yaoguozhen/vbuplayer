@@ -15,6 +15,7 @@ package data
 	 */
 	public class Submit 
 	{
+		private static var uuid:String
 		private static function removeListener(target):void
 		{
 			target.removeEventListener(Event.COMPLETE, loadComHandler);
@@ -48,9 +49,9 @@ package data
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityHandler);
 			urlLoader.load(urlRequest);
 		}
-		private static function getUUID():String
+		public static function creatUUID():void
 		{
-			return MD5.hash(String(getTimer())+String(Math.random())+String(Math.random()) + getDisTime());
+			uuid = MD5.hash(String(getTimer()) + String(Math.random()) + String(Math.random()) + getDisTime());
 		}
 		private static function getDisTime():String
 		{
@@ -70,7 +71,7 @@ package data
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_init";
-			urlVar.uuid = getUUID()
+			urlVar.uuid = uuid
 			urlVar.playurl = Data.playURL
 			
 			urlVar.playtime = getDisTime()
@@ -82,7 +83,7 @@ package data
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_drag";
-			urlVar.uuid = getUUID()
+			urlVar.uuid = uuid;
 			urlVar.playurl = Data.playURL
 			
 			urlVar.dbuffertime = String(time);
@@ -94,7 +95,7 @@ package data
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_buffer";
-			urlVar.uuid = getUUID()
+			urlVar.uuid = uuid
 			urlVar.playurl = Data.playURL
 			
 			urlVar.buffertime = String(time);
@@ -113,10 +114,23 @@ package data
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_fail";
-			urlVar.uuid = getUUID()
+			urlVar.uuid = uuid
 			urlVar.playurl = Data.playURL
 			
 			urlVar.errorcode = errorCode
+			
+			addToYaoTrace(urlVar)
+			submit(urlVar)
+		}
+		public static function submitByteLoaded(datasize:uint, datatime:uint):void
+		{
+			var urlVar:URLVariables = new URLVariables()
+			urlVar.type = "play_finish";
+			urlVar.uuid = uuid
+			urlVar.playurl = Data.playURL
+			
+			urlVar.datasize = datasize
+			urlVar.datatime = datatime
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)
@@ -125,7 +139,7 @@ package data
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_start";
-			urlVar.uuid = getUUID()
+			urlVar.uuid = uuid
 			urlVar.playurl = Data.playURL
 			
 			urlVar.pretime = pretime;//最终播放URL获取耗时，单位毫秒
