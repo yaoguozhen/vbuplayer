@@ -9,8 +9,7 @@ package video.events
 	public class OnMetaDataEvent extends Event 
 	{
 		public static const ON_METADATA:String = "gsdfxcvasfavzxcaef";
-		public var videoWidth:Number = 0;
-		public var videoHeight:Number = 0;
+		public var metaData:Object
 		
 		public function OnMetaDataEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false) 
 		{ 

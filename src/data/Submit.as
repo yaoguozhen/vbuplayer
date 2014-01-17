@@ -85,7 +85,7 @@ package data
 			urlVar.uuid = getUUID()
 			urlVar.playurl = Data.playURL
 			
-			urlVar.dbuffertime = time;
+			urlVar.dbuffertime = String(time);
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)
@@ -97,7 +97,7 @@ package data
 			urlVar.uuid = getUUID()
 			urlVar.playurl = Data.playURL
 			
-			urlVar.buffertime = time;
+			urlVar.buffertime = String(time);
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)
@@ -117,6 +117,24 @@ package data
 			urlVar.playurl = Data.playURL
 			
 			urlVar.errorcode = errorCode
+			
+			addToYaoTrace(urlVar)
+			submit(urlVar)
+		}
+		public static function submitOnFirstPlayStart(pretime:Number,fbuffertime:Number,bitrate:Number,resolution:String,duration:Number,videoformat:String,audioformat:String):void
+		{
+			var urlVar:URLVariables = new URLVariables()
+			urlVar.type = "play_start";
+			urlVar.uuid = getUUID()
+			urlVar.playurl = Data.playURL
+			
+			urlVar.pretime = pretime;//最终播放URL获取耗时，单位毫秒
+			urlVar.fbuffertime = fbuffertime;//获取最终URL后到开始播放的耗时，单位毫秒
+			urlVar.bitrate = bitrate;//视频码率。单位(kbit per second)
+			urlVar.resolution = resolution;//视频分辨率。视频的长宽，中间用-分隔，例如1024-768
+			urlVar.duration = duration;//总时长。单位秒
+			urlVar.videoformat = videoformat;//视频编码
+			urlVar.audioformat = audioformat;//音频编码
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)

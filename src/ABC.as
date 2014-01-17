@@ -53,8 +53,15 @@ package
 		private var _lastTime:Number = 0;//上次播放时间
 		private var _ld_Filter:ColorMatrixFilter = new ColorMatrixFilter();
 		private var _db_Filter:ColorMatrixFilter = new ColorMatrixFilter();
-		private var _dragStartTime:Number = -1
-		private var _bufferEmptyStartTime:Number = -1
+		
+		private var _dragStartTime:Number = -1;//拖拽起始时间点
+		private var _bufferEmptyStartTime:Number = -1;//缓冲器空了起始时间点
+		private var _connectStartTime:Number = -1;//开始连接起始时间点
+		private var _connectSuccessTime:Number = -1;//连接成功起始时间点
+		private var _connectUsedTime:Number = 0;//连接耗时
+		private var _firstBufferUsedTime:Number = 0;//第一次缓冲用时
+		private var _hasDraged:Boolean = false;
+		private var _meteData:Object;
 		
 		public function ABC() :void
 		{
@@ -245,12 +252,53 @@ package
 		{
 			_controlBarManager.loadPer = evn.percent;
 		}
+		private function getDataRate(obj:Object):uint
+		{
+			var videoBitRate:uint = 0;
+			var audioBitRate:uint = 0;
+			if (obj.videodatarate != undefined)
+			{
+				videoBitRate=uint(obj.videodatarate)
+			}
+			if (obj.audiodatarate != undefined)
+			{
+				audioBitRate=uint(obj.audiodatarate)
+			}
+			return videoBitRate + audioBitRate;
+		}
+		private function getResolution(obj:Object):String
+		{
+			var str:String = "";
+			if (obj.width != undefined && obj.height != undefined)
+			{
+				str=String(obj.width) + "-" + String(obj.height)
+			}
+			return str;
+		}
+		private function submitOnFirstPlay():void
+		{
+			var dateRate:uint = getDataRate(_meteData);
+			var resolution:String = getResolution(_meteData);
+			var videoCodeCid:String=""
+			var audioCodeCid:String=""
+			if (_meteData.videocodecid != undefined)
+			{
+				videoCodeCid = _meteData.videocodecid;
+			}
+			if (_meteData.audiocodecid != undefined)
+			{
+				audioCodeCid = _meteData.audiocodecid;
+			}
+			Submit.submitOnFirstPlayStart(_connectUsedTime, _firstBufferUsedTime, dateRate, resolution, _meteData.duration, videoCodeCid, audioCodeCid)
+		}
 		private function onMetaDataHandler(evn:OnMetaDataEvent):void
 		{
-			if (evn.videoWidth != 0 && evn.videoHeight != 0)
+			_meteData = evn.metaData;
+
+			if (_meteData.width != undefined && _meteData.height != undefined)
 			{
 				YaoTrace.add(YaoTrace.ALL,"元数据中有视频长宽值，使用元数据的长宽值计算")
-				Data.videoRatio = evn.videoWidth / evn.videoHeight;
+				Data.videoRatio = _meteData.width / _meteData.height;
 			}
 			else
 			{
@@ -307,6 +355,14 @@ package
 					if (_videoPlayer.bufferFullCount == 1)
 					{
 						_controlBarManager.setVideoStatus = Data.PLAY;
+						if (!_hasDraged)
+						{
+							var now:Number = getTimer();
+							_firstBufferUsedTime = now - _connectSuccessTime;
+							_connectSuccessTime = -1;
+						}
+						submitOnFirstPlay();
+						_firstBufferUsedTime = 0;
 					}
 					if (Data.live)
 					{
@@ -338,10 +394,12 @@ package
 			{
 				case "NetConnection.ReConnect.Failed":
 					alertMsg1 = "服务器连接失败";
+					_connectStartTime = -1;
 					_hideLastPlayTimeAlertTimer.reset();
 					Submit.submitOnPlayFailed("2")
 					break;
 				case "NetConnection.Connect.Rejected":
+					_connectStartTime=-1
 					Submit.submitOnPlayFailed("2")
 				    break;
 				case "NetConnection.Connect.Success":
@@ -349,6 +407,10 @@ package
 					{
 						this.alertMsg1 = "当前没有直播"
 					}*/
+					_connectSuccessTime = getTimer();
+					_connectUsedTime = _connectSuccessTime - _connectStartTime;
+					_connectStartTime = -1;
+					
 					if (_videoPlayer.playCount == 1)
 					{
 						if (_lastTime != 0)
@@ -414,9 +476,18 @@ package
 		}
 		private function progressChangeHandler(evn:ProgressChangeEvent):void
 		{
+			_hasDraged = true;
+			resumeSomePram();
 			_bufferEmptyStartTime = -1;
 			_dragStartTime=getTimer()
 			_videoPlayer.seek(evn.per*_videoPlayer.totalTime/1000);
+		}
+		private function resumeSomePram():void
+		{
+			_connectStartTime = -1;//开始连接起始时间点
+			_connectSuccessTime = -1;//连接成功起始时间点
+			_connectUsedTime = 0;//连接耗时
+			_firstBufferUsedTime = 0;//第一次缓冲用时
 		}
 		private function controlBarRateChangeHandler(evn:RateEvent):void
 		{
@@ -560,6 +631,7 @@ package
 		//播放视频
 		public function play(stream:Object,fms:String):void
 		{
+			_connectStartTime = getTimer();
 			alertMsg1 = "正在连接服务器......";
 			if (Data.live)
 			{

@@ -442,7 +442,7 @@
 				if (_netStream.time > 1)
 				{
 					var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
-					event.currentTime = _netStream.time*1000;
+					event.currentTime = _netStream.time * 1000;
 					dispatchEvent(event);
 				}
 			}
@@ -685,16 +685,7 @@
 				_metaData = obj;
 				_totalTime = _metaData.duration * 1000;
 				var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
-				if (_metaData.width != undefined && _metaData.height != undefined)
-				{
-					event.videoWidth = _metaData.width;
-					event.videoHeight = _metaData.height;
-				}
-				else
-				{
-					event.videoWidth = 0;
-					event.videoHeight = 0;
-				}
+				event.metaData = _metaData;
 				dispatchEvent(event);
 				//trace("a:"+_metaData.hasKeyframes)
 				/*for (var item in _metaData)

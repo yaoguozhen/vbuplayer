@@ -72,6 +72,7 @@ package data
 			var _live = "false";*/
 			Data.playURL=encodeURI(String(obj.loaderInfo.url))
 			var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://www.wwww.w.www.."}'
+			//var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"rtmp://localhost/vod/","streams":[{"type":"0","stream":"mp4:stream_yulan.f4v"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":"http://www.baidu.com"}'
 			YaoTrace.add(YaoTrace.ALL, "接收到 data 值为：" + data);
 			
 			var dataObject:Object = JSON2.decode(data);
@@ -94,6 +95,17 @@ package data
 				{
 					Data.nextVideo = dataObject.nextVideo;
 				}
+
+				var n = Data.streams.length;
+				for (var i:uint = 0; i < n; i++)
+				{
+					if (Data.streams[i].type == "0")
+					{
+						Data.previewStream = String(Data.streams[i].stream);
+						break
+					}
+				}
+
 				if (rezult.errorMsg != "")
 				{
 					YaoTrace.add(YaoTrace.ERROR, rezult.alertMsg);
