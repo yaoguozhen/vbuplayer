@@ -78,6 +78,30 @@ package data
 			addToYaoTrace(urlVar)
 			submit(urlVar)
 		}
+		public static function submitBufferTimeByDrag(time:Number):void
+		{
+			var urlVar:URLVariables = new URLVariables()
+			urlVar.type = "play_drag";
+			urlVar.uuid = getUUID()
+			urlVar.playurl = Data.playURL
+			
+			urlVar.dbuffertime = time;
+			
+			addToYaoTrace(urlVar)
+			submit(urlVar)
+		}
+		public static function submitBufferTimeNotByDrag(time:Number):void
+		{
+			var urlVar:URLVariables = new URLVariables()
+			urlVar.type = "play_buffer";
+			urlVar.uuid = getUUID()
+			urlVar.playurl = Data.playURL
+			
+			urlVar.buffertime = time;
+			
+			addToYaoTrace(urlVar)
+			submit(urlVar)
+		}
 		/**
 		* 1 视频信息不正确
 		* 2 连接服务器失败
@@ -85,7 +109,7 @@ package data
 		* 4 某个码率的视频由于列表之外的原因播放失败
 		* 5 皮肤文件加载失败
 		**/
-		public static function submitOnPlayFailed1(errorCode:String):void
+		public static function submitOnPlayFailed(errorCode:String):void
 		{
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_fail";

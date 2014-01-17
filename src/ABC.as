@@ -36,6 +36,7 @@ package
 	import fl.motion.ColorMatrix;
 	import flash.filters.ColorMatrixFilter;
 	import flash.net.navigateToURL
+	import flash.utils.getTimer;
 	/**
 	 * ...
 	 * @author t
@@ -52,6 +53,9 @@ package
 		private var _lastTime:Number = 0;//上次播放时间
 		private var _ld_Filter:ColorMatrixFilter = new ColorMatrixFilter();
 		private var _db_Filter:ColorMatrixFilter = new ColorMatrixFilter();
+		private var _dragStartTime:Number = -1
+		private var _bufferEmptyStartTime:Number = -1
+		
 		public function ABC() :void
 		{
 			_callJSPerSecondTimer = new Timer(1000);
@@ -151,6 +155,9 @@ package
 			//DispatchEvents.STREAM_PLAY_COMPLETE();
 			_controlBarManager.previewVideo = false;
 			
+			_dragStartTime = -1
+		    _bufferEmptyStartTime = -1
+			
 			if (Data.canPlayNext)
 			{
 				navigateToURL(new URLRequest(Data.nextVideo), "_blank");
@@ -180,6 +187,8 @@ package
 			_controlBarManager.bigPlayBtnType = "connect";
 			alertMsg1 = "链接断开，请点击播放按钮重试";
 			_hideLastPlayTimeAlertTimer.reset();
+			_bufferEmptyStartTime = -1;
+			_dragStartTime = -1;
 		}
 		private function playingHandler(evn:PlayingEvent):void
 		{
@@ -303,12 +312,14 @@ package
 					{
 						_controlBarManager.adMsg = "";
 					}
+					submitOnBufferFull()
 					break;
 				case "NetStream.Buffer.Empty":
 					if (Data.live)
 					{
 						//trace("广告开始计时")
 					}
+					_bufferEmptyStartTime=getTimer()
 					break;
 				case "NetStream.Play.UnpublishNotify":
 					//onUnPublish()
@@ -353,7 +364,20 @@ package
 					break;
 			}
 		}
-		
+		private function submitOnBufferFull():void
+		{
+			var now:Number = getTimer();
+			if (_dragStartTime != -1)
+			{
+				Submit.submitBufferTimeByDrag(now - _dragStartTime);
+				_dragStartTime = -1;
+			}
+			if (_bufferEmptyStartTime != -1)
+			{
+				Submit.submitBufferTimeNotByDrag(now - _bufferEmptyStartTime);
+				_dragStartTime = -1;
+			}
+		}
 		private function fullscreenBtnClickHandler(evn:Event):void
 		{
 			switch(_stage.displayState) 
@@ -390,6 +414,8 @@ package
 		}
 		private function progressChangeHandler(evn:ProgressChangeEvent):void
 		{
+			_bufferEmptyStartTime = -1;
+			_dragStartTime=getTimer()
 			_videoPlayer.seek(evn.per*_videoPlayer.totalTime/1000);
 		}
 		private function controlBarRateChangeHandler(evn:RateEvent):void
