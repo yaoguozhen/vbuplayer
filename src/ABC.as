@@ -170,7 +170,7 @@ package
 			Submit.submitByteLoaded(_videoPlayer.byteLoaded, _loadingUsedTime);
 			_loadingUsedTime = 0;
 			_loadingStartTime = -1;
-			
+			Submit.creatUUID()
 			if (Data.canPlayNext)
 			{
 				navigateToURL(new URLRequest(Data.nextVideo), "_blank");
@@ -644,6 +644,15 @@ package
 		{
 			_videoPlayer.resume();
 		}
+		public function pageClose():void
+		{
+			//_videoPlayer.resume();
+			if (_videoPlayer.status != Data.COMPLETE)
+			{
+				Submit.submitByteLoaded(_videoPlayer.byteLoaded, _loadingUsedTime);
+			}
+		}
+		
 		//播放视频
 		public function play(stream:Object,fms:String):void
 		{

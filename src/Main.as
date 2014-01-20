@@ -3,6 +3,8 @@ package
 	import com.greensock.events.LoaderEvent;
 	import data.DispatchEvents;
 	import data.Submit;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	//import data.VideoData;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -36,6 +38,7 @@ package
 				//ExternalInterface.addCallback("v_start", v_start);
 				//ExternalInterface.addCallback("v_pause", v_pause);
 				//ExternalInterface.addCallback("v_resume", v_resume);
+				ExternalInterface.addCallback("v_pageClose", v_pageClose);
 			}
 			catch (err:Error)
 			{
@@ -45,7 +48,6 @@ package
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
-
 		private function init(e:Event = null):void 
 		{
 			YaoTrace.init(stage, "xxx");
@@ -76,6 +78,18 @@ package
 			else
 			{
 				Submit.submitOnPlayFailed("1")
+			}
+			
+			try
+			{
+				if (ExternalInterface.available)
+				{
+					ExternalInterface.call("flashReady");
+				}
+			}
+			catch (err:Error)
+			{
+				
 			}
 		}
 		/*
@@ -178,5 +192,10 @@ package
 		{
 			_abc.resume();
 		}
+		public function v_pageClose():void
+		{
+			_abc.pageClose();
+		}
+		
 	}
 }
