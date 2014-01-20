@@ -558,6 +558,7 @@ package
 		private function videoPlayerRateChangeHandler(evn:RateEvent):void
 		{
 			_controlBarManager.setCurrentRate(evn.rate);
+			Data.playURL = _videoPlayer.currentVideoURL;
 		}
 		private function screenClickHotClickHandler(evn:Event):void
 		{
@@ -666,6 +667,7 @@ package
 				}
 				_controlBarManager.setPreviewVideo(Data.fms,Data.previewStream);
 			}
+			Data.playURL = _videoPlayer.currentVideoURL;
 		}
 		//设置码率面板
 		public function initRate():void

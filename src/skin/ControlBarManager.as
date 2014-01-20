@@ -692,7 +692,7 @@ package skin
 		//设置下载进度
 		public function set loadPer(n:Number):void
 		{
-			_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*n;
+			//_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*n;
 		}
 		//设置播放进度
 		public function set playPer(n:Number):void

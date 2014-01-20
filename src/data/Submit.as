@@ -72,7 +72,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_init";
 			urlVar.uuid = uuid
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playHtmlPageURL)
 			
 			urlVar.playtime = getDisTime()
 			
@@ -84,7 +84,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_drag";
 			urlVar.uuid = uuid;
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playURL);
 			
 			urlVar.dbuffertime = String(time);
 			
@@ -96,7 +96,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_buffer";
 			urlVar.uuid = uuid
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playURL)
 			
 			urlVar.buffertime = String(time);
 			
@@ -115,7 +115,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_fail";
 			urlVar.uuid = uuid
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playURL)
 			
 			urlVar.errorcode = errorCode
 			
@@ -127,7 +127,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_finish";
 			urlVar.uuid = uuid
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playURL)
 			
 			urlVar.datasize = datasize
 			urlVar.datatime = datatime
@@ -140,7 +140,7 @@ package data
 			var urlVar:URLVariables = new URLVariables()
 			urlVar.type = "play_start";
 			urlVar.uuid = uuid
-			urlVar.playurl = Data.playURL
+			urlVar.playurl = encodeURI(Data.playURL)
 			
 			urlVar.pretime = pretime;//最终播放URL获取耗时，单位毫秒
 			urlVar.fbuffertime = fbuffertime;//获取最终URL后到开始播放的耗时，单位毫秒

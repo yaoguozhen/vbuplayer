@@ -891,6 +891,15 @@
 		{
 			return _videoRatio;
 		}
+		public function get currentVideoURL():String
+		{
+			var currentStream:String = getStream();
+			if (_useFms)
+			{
+				return _fms + currentStream;
+			}
+			return currentStream;
+		}
 	}
 	
 }

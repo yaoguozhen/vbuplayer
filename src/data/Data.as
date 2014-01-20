@@ -30,8 +30,9 @@ package data
 		public static var fms:String;//fms地址
 		public static var streams:Object;//流名称
 		public static var previewStream:String//预览流名称
-		public static var nextVideo:String=""
-		public static var playURL:String
+		public static var nextVideo:String = "";
+		public static var playURL:String;
+		public static var playHtmlPageURL:String;
 
 		public static var isFullScreen:Boolean = false;//是否是全屏		
 		
@@ -70,7 +71,7 @@ package data
 			var _api = "http://115.28.6.41/VideoControl/library/VideoLibrary.php";
 			var _progressBarDraged = "false";
 			var _live = "false";*/
-			Data.playURL=encodeURI(String(obj.loaderInfo.url))
+			Data.playHtmlPageURL=String(obj.loaderInfo.url)
 			var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":""}'
 			//var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"rtmp://localhost/vod/","streams":[{"type":"0","stream":"mp4:stream_yulan.f4v"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":"http://www.baidu.com"}'
 			YaoTrace.add(YaoTrace.ALL, "接收到 data 值为：" + data);
