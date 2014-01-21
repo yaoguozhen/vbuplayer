@@ -173,7 +173,7 @@ package
 			Submit.creatUUID()
 			if (Data.canPlayNext)
 			{
-				navigateToURL(new URLRequest(Data.nextVideo), "_blank");
+				navigateToURL(new URLRequest(Data.nextVideo), "_self");
 			}
 		}
 		private function onUnPublish():void//直播停止发布
