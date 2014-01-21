@@ -7,6 +7,7 @@ package skin
 	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.external.ExternalInterface;
 	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.utils.Timer;
@@ -47,7 +48,8 @@ package skin
 		private var _preview:MovieClip;
 		private var _alertMsgBg:MovieClip;
 
-		private var _currentRate:String="1";
+		private var _currentRate:String = "1";
+		private var _lightIsOn:Boolean = true;
 		
 		private var _volNumBeforeClear:Number;
 		
@@ -207,6 +209,12 @@ package skin
 			_settingPanel.rate0.addEventListener(MouseEvent.CLICK,settingPanelRateBtnClickHandler)
 			_settingPanel.rate43.addEventListener(MouseEvent.CLICK,settingPanelRateBtnClickHandler)
 			_settingPanel.rate169.addEventListener(MouseEvent.CLICK, settingPanelRateBtnClickHandler)
+			_settingPanel.openLight.gotoAndStop(2);
+			_settingPanel.closeLight.stop();
+			_settingPanel.openLight.buttonMode = true;
+			_settingPanel.closeLight.buttonMode = true;
+			_settingPanel.openLight.addEventListener(MouseEvent.CLICK,settingPanelLightBtnClickHandler)
+			_settingPanel.closeLight.addEventListener(MouseEvent.CLICK,settingPanelLightBtnClickHandler)
 			_settingPanel.closeBtn.addEventListener(MouseEvent.CLICK, settingPanelCloseBtnClickHandler)
 			
 			_brightnessBar = new YaoSlider()
@@ -250,6 +258,36 @@ package skin
 				event.rate = _settingPanel.currentRateBtn.value;
 				dispatchEvent(event)
 			}
+		}
+		private function settingPanelLightBtnClickHandler(evn:MouseEvent):void
+		{
+				switch(evn.currentTarget.name)
+				{
+					case "openLight":
+						if (!_lightIsOn)
+						{
+							_settingPanel.openLight.gotoAndStop(2);
+							_settingPanel.closeLight.gotoAndStop(1);
+							_lightIsOn = true;
+							if (ExternalInterface.available)
+							{
+								ExternalInterface.call("turnOn");
+							}
+						}
+						break;
+					case "closeLight":
+						if (_lightIsOn)
+						{
+							_settingPanel.openLight.gotoAndStop(1);
+							_settingPanel.closeLight.gotoAndStop(2);
+							_lightIsOn = false;
+							if (ExternalInterface.available)
+							{
+								ExternalInterface.call("turnOff");
+							}
+						}
+						break;
+				}
 		}
 		private function settingPanelCloseBtnClickHandler(evn:MouseEvent):void
 		{
@@ -317,7 +355,6 @@ package skin
 		}
 		private function progressBarChangeHandler(evn:Event):void
 		{
-			trace("xxxxxx:"+playPer)
 			var event:ProgressChangeEvent = new ProgressChangeEvent(ProgressChangeEvent.CHANGE);
 			event.per = playPer;
 			dispatchEvent(event);
