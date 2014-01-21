@@ -1,5 +1,6 @@
 ﻿package video
 {
+	import com.greensock.motionPaths.RectanglePath2D;
 	import data.Data;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -38,6 +39,7 @@
 		private var _netConnetction:NetConnection;
 		
 		private var _totalTime:Number = -1;//视频总时间
+		private var _staticTotalTime:Number = -1;//视频总时间
 		private var _currentTime:Number = 0;//当前时间
 		
 		private var _beforChangeRateTime:Number = 0;
@@ -518,12 +520,19 @@
 				}
 			}
 		}
-		private function _seek(time:Number):void
+		private function _seek(time:Number,forceConnect:Boolean):void
 		{
 			if (_connectSuccess)
 			{
 				_playingTimer.stop();
 				advSeek(_netStream,time)
+			}
+			else
+			{
+				if (forceConnect)
+				{
+					play(_stream,_fms,_currentRate,time,_bufferTime,_live);
+				}
 			}
 		}
 		private function _resume():void
@@ -667,7 +676,10 @@
 		{
 			if (_useFms)
 			{
-				stream.seek(time);
+				if (stream)
+				{
+					stream.seek(time);
+				}
 			}
 			else
 			{
@@ -707,6 +719,7 @@
 			{
 				_metaData = obj;
 				_totalTime = _metaData.duration * 1000;
+				_staticTotalTime = _totalTime;
 				var event:OnMetaDataEvent = new OnMetaDataEvent(OnMetaDataEvent.ON_METADATA);
 				event.metaData = _metaData;
 				dispatchEvent(event);
@@ -824,9 +837,9 @@
 		{
 			_resume();
 		}
-		public function seek(time:Number):void
+		public function seek(time:Number,forceConnect:Boolean=false):void
 		{
-			_seek(time);
+			_seek(time,forceConnect);
 		}
 		//设置音量
 		public function setVol(n:Number):void
@@ -853,11 +866,7 @@
 		//视频持续时间
 		public function get totalTime():Number
 		{
-			if (_connectSuccess)
-			{
-				return _totalTime;
-			}
-			return 0;
+			return _staticTotalTime;
 		}
 		//视频当前时间
 		public function get currentTime():Number
@@ -899,6 +908,14 @@
 				return _fms + currentStream;
 			}
 			return currentStream;
+		}
+		public function get currentFMS():String
+		{
+			return _fms;
+		}
+		public function get currentStream():Object
+		{
+			return _stream
 		}
 	}
 	

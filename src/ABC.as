@@ -64,6 +64,7 @@ package
 		private var _meteData:Object;
 		private var _loadingStartTime:uint = -1;
 		private var _loadingUsedTime:uint = 0;
+		private var _isNewStartPlay:Boolean = true;
 		
 		public function ABC() :void
 		{
@@ -170,7 +171,8 @@ package
 			Submit.submitByteLoaded(_videoPlayer.byteLoaded, _loadingUsedTime);
 			_loadingUsedTime = 0;
 			_loadingStartTime = -1;
-			Submit.creatUUID()
+			//Submit.creatUUID()
+			_isNewStartPlay = true;
 			if (Data.canPlayNext)
 			{
 				navigateToURL(new URLRequest(Data.nextVideo), "_self");
@@ -185,6 +187,25 @@ package
 			_controlBarManager.setBuffering(false);
 			//DispatchEvents.STREAM_PLAY_COMPLETE();
 		}
+		private function onConnectSuccess():void
+		{
+			/*if (Data.live)
+			{
+				this.alertMsg1 = "当前没有直播"
+			}*/
+			_connectSuccessTime = getTimer();
+			_connectUsedTime = _connectSuccessTime - _connectStartTime;
+			_connectStartTime = -1;
+					
+			if (_videoPlayer.playCount == 1)
+			{
+				if (_lastTime != 0)
+				{
+					alertMsg1 = "您上次观看到:" + MyDate.getFormatTime(_lastTime * 1000, true) + "，您将继续观看";
+					_hideLastPlayTimeAlertTimer.start();
+				}
+			}
+		}
 		private function onNetConnectionClose():void
 		{
 			if (Data.live)
@@ -192,8 +213,8 @@ package
 				_waitOnLive = true;
 			}
 			_videoPlayer.visible = false;
-			_controlBarManager.progressBarActive = -1;
-			_controlBarManager.playBtnEnabled = false;
+			//_controlBarManager.progressBarActive = -1;
+			//_controlBarManager.playBtnEnabled = false;
 			_controlBarManager.setBuffering(false);
 			_controlBarManager.rateBtnEnabled = false;
 			_controlBarManager.setVideoStatus = Data.CLOSED;
@@ -417,22 +438,7 @@ package
 					Submit.submitOnPlayFailed("2")
 				    break;
 				case "NetConnection.Connect.Success":
-					/*if (Data.live)
-					{
-						this.alertMsg1 = "当前没有直播"
-					}*/
-					_connectSuccessTime = getTimer();
-					_connectUsedTime = _connectSuccessTime - _connectStartTime;
-					_connectStartTime = -1;
-					
-					if (_videoPlayer.playCount == 1)
-					{
-						if (_lastTime != 0)
-						{
-							alertMsg1 = "您上次观看到:" + MyDate.getFormatTime(_lastTime * 1000, true) + "，您将继续观看";
-							_hideLastPlayTimeAlertTimer.start();
-						}
-					}
+					onConnectSuccess()
 					break;
 				case "NetConnection.Connect.Closed":
 					//alertMsg1 = "服务器连接已断开"
@@ -478,7 +484,14 @@ package
 		}
 		private function playBtnClickHandler(evn:Event):void
 		{
-			_videoPlayer.resume();
+			if (_videoPlayer.status == Data.COMPLETE)
+			{
+			    _videoPlayer.resume();
+			}
+			else
+			{
+				
+			}
 		}
 		private function pauseBtnClickHandler(evn:Event):void
 		{
@@ -490,12 +503,19 @@ package
 		}
 		private function progressChangeHandler(evn:ProgressChangeEvent):void
 		{
-			_hasDraged = true;
-			resumeSomePram();
-			_bufferEmptyStartTime = -1;
-			_loadingStartTime = getTimer();
-			_dragStartTime = getTimer();
-			_videoPlayer.seek(evn.per*_videoPlayer.totalTime/1000);
+			if (_videoPlayer.status == "")
+			{
+				play(_videoPlayer.currentStream,_videoPlayer.currentFMS,evn.per * _videoPlayer.totalTime/1000)
+			}
+			else
+			{
+				_hasDraged = true;
+				resumeSomePram();
+				_bufferEmptyStartTime = -1;
+				_loadingStartTime = getTimer();
+				_dragStartTime = getTimer();
+				_videoPlayer.seek(evn.per * _videoPlayer.totalTime / 1000);
+			}
 		}
 		private function resumeSomePram():void
 		{
@@ -583,6 +603,10 @@ package
 				}
 				else if (_controlBarManager.bigPlayBtnType=="connect")
 				{
+					if (_isNewStartPlay)
+					{
+						_controlBarManager.playPer = 0;
+					}
 					_controlBarManager.bigPlayBtnType = "resume";
 					play(Data.streams, Data.fms);
 					if (!Data.live)
@@ -654,26 +678,23 @@ package
 		}
 		
 		//播放视频
-		public function play(stream:Object,fms:String):void
+		public function play(stream:Object,fms:String,startTime:Number=0):void
 		{
 			_connectStartTime = getTimer();
 			alertMsg1 = "正在连接服务器......";
+			if (_isNewStartPlay)
+			{
+				Submit.creatUUID();
+				Submit.submitOnInit();
+				_isNewStartPlay = false;
+			}
 			if (Data.live)
 			{
 				_videoPlayer.play(stream,fms,"",0,Data.LIVE_BUFFERTIME,true);
 			}
 			else
 			{
-				if (_videoPlayer.playCount==0)
-				{
-					//_lastTime = DispatchEvents.GET_STARTTIME();
-					_lastTime = 0;
-					_videoPlayer.play(stream,fms,_controlBarManager.currentRate,_lastTime,Data.VOD_BUFFERTIME,false);
-				}
-				else
-				{
-					_videoPlayer.play(stream,fms,_controlBarManager.currentRate,0,Data.VOD_BUFFERTIME,false);
-				}
+				_videoPlayer.play(stream,fms,_controlBarManager.currentRate,startTime,Data.VOD_BUFFERTIME,false);
 				_controlBarManager.setPreviewVideo(Data.fms,Data.previewStream);
 			}
 			Data.playURL = _videoPlayer.currentVideoURL;

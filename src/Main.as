@@ -60,7 +60,6 @@ package
 			stage.addEventListener(Event.RESIZE, resizeHandler);
 			
 			DispatchEvents.init(this);
-			Submit.creatUUID()
 			_videoPlayer = new AdvVideoPlayer();
 			/*
 			_videoData = new VideoData();
@@ -70,7 +69,6 @@ package
 			var rezult = Data.getData(stage);
 			if (rezult)
 			{
-				Submit.submitOnInit();
 				initSkinLoader();
 				_skin.load(Data.skin+"?random="+Math.random());
 				//_skin.load(Data.skin);
