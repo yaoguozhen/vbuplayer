@@ -1,47 +1,105 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Type" content="text/plain; charset=utf-8" />
 <title>无标题文档</title>
 
+<style type="text/css">
+<!--
+.day
+{
+    background: #fff;
+}
+.night
+{
+    background: #000;
+}
+-->
+</style>
+<script type="text/javascript" src="swfobject.js"></script>
 </head>
 
 <body onbeforeunload="onbeforeunload()">
-<br>
-<br>
- <div id="flashcontent"/>
-  <script type="text/javascript" src="swfobject.js"></script>
-<script type="text/javascript">
 
+<div id="flashcontent" class="player"></div>
+<script type="text/javascript">
+	/*****************  传给flash的数据 ********************	
+	{
+		"skin":"videoPlayerSkin.swf",
+		"submitURl":"http://localhost/vbuplayer/submit.asp",
+		"fms":"",
+		"streams":
+			[
+				{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},
+				{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},
+				{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},
+				{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}
+			],
+		"nextStream":"http://localhost/vbuplayer/main.html"
+	}
+	
+	skin: 播放器皮肤文件地址，绝对地址或相对地址都可以
+	submitURl：播放器提采集到的交数据的地址
+	fms：fms服务器地址。
+	    如使用fms，则为fms地址。形如 rtmp://localhost/vod/
+		如不使用fms，则这里设置为空即可
+	streams：不同码率视频列表
+	    type：
+		    0 预览用的视频。这个视频的码率不用很高。
+			1 标清
+			2 高清
+			3 超清
+		stream: 
+		    如果使用fms，此值为视频名称。格式为“扩展名：文件名”，形如 “flv:streamName”
+			如不使用fms，此值为视频的地址，如http://localhost/stream.flv
+	nextStream：下一集的地址
+	    如果为空，则表示没有下一集，当前视频播放完毕后，会出现重播按钮
+		如果不为空，则表示有下一集，当前视频播放完毕后，会跳转到这个值指定的页面
+	**************************************************/
+	var videoData='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://localhost/vbuplayer/main.html"}'
+    
+	var reg = /"/gi
+	var videoData = videoData.replace(reg, "'");
     var flashvars =
     {
-
+		data:videoData//传给flash的参数
 	};
 	var params = 
 	{
-	  allowScriptAccess: "always",
-	  allowFullScreen:"true"
+	  allowScriptAccess: "always",//允许flash调用js方法
+	  allowFullScreen:"true"//允许全屏
 	};
 	var attributes = 
 	{
-	  id: "myflash"
+	  id: "myflash"//flash的id
 	};
-	swfobject.embedSWF("videoplayer.swf", "flashcontent", "640", "520", "6.0.0", "expressInstall.swf", flashvars, params, attributes);
+	/**************  参数说明  ***************
+	第1个参数：flash播放器地址
+	第2个参数：包含flash播放器的div的id
+	第3个参数：视频播放器的宽度
+	第4个参数：视频播放器的高度
+	第5个参数：需要的flashplayer插件最低版本
+	第6个参数：如果没有达到第5个参数设定的最低版本，这个expressInstall.swf会引导用户下载最新的flashplayer插件。（这个参数可以不用管，有没有这个expressInstall.swf都可以）
+	*******************************************/
+	swfobject.embedSWF("videoplayer.swf", "flashcontent", "640", "520", "9.0.0", "expressInstall.swf", flashvars, params, attributes);
 
 </script>
 <script language="javascript">
-function onbeforeunload()
-{
-    myflash.v_pageClose()
-}
-function turnOn()
-{
-    alert("1")
-}
-function turnOff()
-{
-    alert("0")
-}
+    //关闭页面是调用
+	function onbeforeunload()
+	{
+		myflash.v_pageClose()
+	}
+	//开灯（在播放器中点击开灯时调用）
+	function turnOn()
+	{
+	   document.body.className = "day";
+	}
+	//关灯（在播放器中点击关灯时调用）
+	function turnOff()
+	{
+	   document.body.className = "night";
+	}
 </script>
 
 </body>

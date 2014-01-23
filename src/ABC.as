@@ -486,11 +486,11 @@ package
 		{
 			if (_videoPlayer.status == Data.COMPLETE)
 			{
-			    _videoPlayer.resume();
+			   
 			}
 			else
 			{
-				
+				 _videoPlayer.resume();
 			}
 		}
 		private function pauseBtnClickHandler(evn:Event):void
@@ -684,6 +684,7 @@ package
 			alertMsg1 = "正在连接服务器......";
 			if (_isNewStartPlay)
 			{
+				_bufferEmptyStartTime=-1
 				Submit.creatUUID();
 				Submit.submitOnInit();
 				_isNewStartPlay = false;
