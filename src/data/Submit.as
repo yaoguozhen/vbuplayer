@@ -78,6 +78,8 @@ package data
 			
 			addToYaoTrace(urlVar)
 			submit(urlVar)
+			
+			Data.hasSubmitByPlayInit = true;
 		}
 		public static function submitBufferTimeByDrag(time:Number):void
 		{

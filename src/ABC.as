@@ -175,6 +175,7 @@ package
 			_isNewStartPlay = true;
 			if (Data.canPlayNext)
 			{
+				Data.jumpOnPlayComplete = true;
 				navigateToURL(new URLRequest(Data.nextVideo), "_self");
 			}
 		}
@@ -671,9 +672,11 @@ package
 		public function pageClose():void
 		{
 			//_videoPlayer.resume();
-			if (_videoPlayer.status != Data.COMPLETE)
+			
+			if (Data.jumpOnPlayComplete == false && Data.hasSubmitByPlayInit && Data.hasSubmitByPageClose == false)
 			{
 				Submit.submitByteLoaded(_videoPlayer.byteLoaded, _loadingUsedTime);
+				Data.hasSubmitByPageClose = true
 			}
 		}
 		

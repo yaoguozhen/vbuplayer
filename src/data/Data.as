@@ -45,6 +45,10 @@ package data
 		public static var live:Boolean = false;//是否是直播
 		public static var skin:String;//皮肤地址
 		
+		public static var hasSubmitByPageClose:Boolean = false;
+		public static var hasSubmitByPlayInit:Boolean = false;
+		public static var jumpOnPlayComplete:Boolean = false;
+		
 		public static function get canPlayNext():Boolean
 		{
 			if (Data.autoPlayNext)
@@ -61,23 +65,12 @@ package data
 			Data.playHtmlPageURL = String(obj.loaderInfo.url)
 			
 			/***************** 真实数据 **********************/
-			/*var _skin = obj.loaderInfo.parameters.skin;
-			var _uid = obj.loaderInfo.parameters.vid;
-			var _api = obj.loaderInfo.parameters.api;
-			var _progressBarDraged = obj.loaderInfo.parameters.progressBarDraged;
-			var _live = obj.loaderInfo.parameters.live;*/
             var _data:String = String(obj.loaderInfo.parameters.data);
 	        var myPattern:RegExp = /'/gi;      
 			_data = _data.replace(myPattern, "\"");
 			/***************** 测试数据 **********************/
-			/*var _skin ="videoPlayerSkin.swf";
-			var _uid = '[{"appid":"88668301940490240","appkey":"88668301940490240","method":"getVideoInfo","param":[{ "VideoId" : "92905205036745986"}]}]';
-			var _api = "http://115.28.6.41/VideoControl/library/VideoLibrary.php";
-			var _progressBarDraged = "false";
-			var _live = "false";*/
-			
-			//var _data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://localhost/vbuplayer/main.html"}'
-			//var data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"rtmp://localhost/vod/","streams":[{"type":"0","stream":"mp4:stream_yulan.f4v"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":""}'
+			//var _data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://localhost/vbuplayer/main2.html"}'
+			//var _data:String='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"rtmp://localhost/vod/","streams":[{"type":"0","stream":"mp4:stream_yulan.f4v"},{"type":"1","stream":"mp4:stream_biaoqing.f4v"},{"type":"2","stream":"mp4:stream_gaoqing.f4v"},{"type":"3","stream":"mp4:stream_chaoqing.f4v"}],"nextStream":""}'
 			YaoTrace.add(YaoTrace.ALL, "接收到 data 值为：" + _data);
 			
 			if (_data == "undefined"||_data == "")
@@ -85,7 +78,7 @@ package data
 				YaoTrace.add(YaoTrace.ERROR, "接受到的值非法");
 				return false;
 			}
-
+            
 			var dataObject:Object = JSON2.decode(_data);
 			var rezult:Object = CheckData.check(dataObject);
 			if (rezult.errorMsg == "")

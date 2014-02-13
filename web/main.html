@@ -19,7 +19,7 @@
 <script type="text/javascript" src="swfobject.js"></script>
 </head>
 
-<body onbeforeunload="onbeforeunload()">
+<body onbeforeunload ="onbeforeunload()">
 
 <div id="flashcontent" class="player"></div>
 <script type="text/javascript">
@@ -56,7 +56,7 @@
 	    如果为空，则表示没有下一集，当前视频播放完毕后，会出现重播按钮
 		如果不为空，则表示有下一集，当前视频播放完毕后，会跳转到这个值指定的页面
 	**************************************************/
-	var videoData='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://localhost/vbuplayer/main.html"}'
+	var videoData='{"skin":"videoPlayerSkin.swf","submitURl":"http://localhost/vbuplayer/submit.asp","fms":"","streams":[{"type":"0","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"1","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"2","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"},{"type":"3","stream":"http://flv5.bn.netease.com/videolib3/1401/09/KdCQr7550/SD/KdCQr7550.flv"}],"nextStream":"http://localhost/vbuplayer/main2.html"}'
     
 	var reg = /"/gi
 	var videoData = videoData.replace(reg, "'");
@@ -88,6 +88,7 @@
     //关闭页面是调用
 	function onbeforeunload()
 	{
+	    alert('123')
 		myflash.v_pageClose()
 	}
 	//开灯（在播放器中点击开灯时调用）
