@@ -50,8 +50,8 @@ package
 		}
 		private function init(e:Event = null):void 
 		{
-			YaoTrace.init(stage, "xxxx");
-			//YaoTrace.add(YaoTrace.ALL, " 修改音量滑块拖动问题 ");
+			YaoTrace.init(stage, "shibingdaxiang");
+			YaoTrace.add(YaoTrace.ALL, " 修改了第一次放到进度条上时，发起两次请求的问题 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             

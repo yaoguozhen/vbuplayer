@@ -27,6 +27,7 @@ package
 		private var _gotoTime:Number = 0
 		private var _closeConnectionTimer:Timer
 		private var _showVideoTimer:Timer
+		private var _seekVideoTimer:Timer;
 		private var _path:MovieClip
 		private var _totalTime:Number = -1;
 		private var _connecting:Boolean = false
@@ -45,6 +46,9 @@ package
 			
 			_showVideoTimer = new Timer(500)
 			_showVideoTimer.addEventListener(TimerEvent.TIMER, showVideoTimerHandler);
+			
+			_seekVideoTimer = new Timer(500)
+			_seekVideoTimer.addEventListener(TimerEvent.TIMER, seekVideoTimerHandler);
 		}
 		private function closeConnTimerHandler(evn:TimerEvent):void
 		{
@@ -72,9 +76,16 @@ package
 		private function showVideoTimerHandler(evn:TimerEvent):void
 		{
 			_showVideoTimer.stop()
+			
 			_container.visible = true
 			setContainerPosition()
-			gotoPlay(_totalTime*_path.mouseX/_path.width)
+			//gotoPlay(_totalTime*_path.mouseX/_path.width)
+		}
+		private function seekVideoTimerHandler(evn:TimerEvent):void
+		{
+			_seekVideoTimer.stop();
+			
+			gotoPlay(_totalTime * _path.mouseX / _path.width)
 		}
 		private function setContainerPosition():void
 		{
@@ -184,7 +195,12 @@ package
 		private function pathMoveHandler(evn:MouseEvent):void
 		{
 			setContainerPosition()
-			gotoPlay(_totalTime*_path.mouseX/_path.width)
+			if (_netStream)
+			{
+				_netStream.pause()
+			}
+			_seekVideoTimer.stop();
+			_seekVideoTimer.start();
 		}
 		private function advSeek(stream:NetStream,time:Number):void
 		{
@@ -268,6 +284,7 @@ package
 			_container.visible=false
 			_closeConnectionTimer.start()
 			_showVideoTimer.stop()
+			_seekVideoTimer.stop();
 		}
 		public function setVideo(fms:String, stream:String):void
 		{
