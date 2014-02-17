@@ -51,7 +51,7 @@ package
 		private function init(e:Event = null):void 
 		{
 			YaoTrace.init(stage, "shibingdaxiang");
-			YaoTrace.add(YaoTrace.ALL, " 修改了第一次放到进度条上时，发起两次请求的问题 ");
+			YaoTrace.add(YaoTrace.ALL, " 修改了暂停时，点击进度条，按钮状态不变的问题 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             

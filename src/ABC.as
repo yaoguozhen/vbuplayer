@@ -510,6 +510,7 @@ package
 			}
 			else
 			{
+				//_controlBarManager.setVideoStatus = Data.PLAY;
 				_hasDraged = true;
 				resumeSomePram();
 				_bufferEmptyStartTime = -1;

@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2014/2/13'</value>
+      <value>'2014/2/17'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -36,7 +36,7 @@
     <source-path append="true">
       <path-element>E:\work\flash\vbu_videoplayer\src</path-element>
       <path-element>D:\Program Files (x86)\Adobe Flash CS6\Adobe Flash CS6\Common\Configuration\ActionScript 3.0\projects\Flash\src</path-element>
-      <path-element>D:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
+      <path-element>d:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
   <file-specs>

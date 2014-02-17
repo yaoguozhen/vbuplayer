@@ -686,7 +686,11 @@
 				_lastByteLoaded = 0;
 				var currentStream:String = getStream();
 				var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
-				stream.play(currentStream+"?start="+theKeyFrame)
+				stream.play(currentStream + "?start=" + theKeyFrame)
+				if ( status == Data.PAUSE)
+				{
+					stream.pause()
+				}
 			}
 		}
 		private function getPosFromTime(param1:Array, param2:Array, param3:Number) : Number
