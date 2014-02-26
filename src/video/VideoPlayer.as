@@ -24,6 +24,7 @@
 	import video.events.PlayStatusEvent;
 	import video.events.StreamNotFountEvent;
 	import zhen.guo.yao.components.yaotrace.YaoTrace;
+
 	/**
 	 * ...
 	 * @author yaoguozhen
@@ -75,6 +76,7 @@
 		private var _playCount:uint = 0;
 		private var _videoRatio:Number;
 		private var _lastByteLoaded:uint = 0
+		private var _loadPer:Number=0;
 		
 		public var bufferFullCount:uint = 0;//缓冲区满的次数
 		public var byteLoaded:uint = 0;
@@ -439,25 +441,26 @@
 			{
 				byteLoaded += _netStream.bytesLoaded - _lastByteLoaded;
 				_lastByteLoaded = _netStream.bytesLoaded;
+				_loadPer = _netStream.bytesLoaded / _netStream.bytesTotal
+				var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
 				if (_netStream.bytesLoaded < _netStream.bytesTotal)
 				{
-					var per:Number = _netStream.bytesLoaded / _netStream.bytesTotal;
-				
-					var event:LoadingEvent = new LoadingEvent(LoadingEvent.LOADING);
-					event.percent = per;
-					dispatchEvent(event);
+					event.percent = _loadPer;
 				}
 				else
 				{
+					event.percent = 1;
 					_loadingTimer.reset();
 					dispatchEvent(new Event("loadingComplete"))
 				}
+				dispatchEvent(event);
 			}
 		}
 		private function playingTimerHandler(evn:TimerEvent):void
 		{
 			if (_netStream)
 			{
+				trace("当前时间："+_netStream.time)
 				if (_netStream.time > 1)
 				{
 					if (_netStream.time * 1000 <= totalTime)
@@ -683,17 +686,44 @@
 			}
 			else
 			{
-				_lastByteLoaded = 0;
-				var currentStream:String = getStream();
-				var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
-				stream.play(currentStream + "?start=" + theKeyFrame)
+			    if(keyframes.data == undefined)
+				{
+					if (stream)
+					{
+						stream.seek(time);
+					}
+				}
+				else
+				{
+					_lastByteLoaded = 0;
+					var currentStream:String = getStream();
+					var theKeyFrame:String
+					if(keyframes.type=="flv")
+					{
+						theKeyFrame = String(getFlvPosFromTime(keyframes.data.times, keyframes.data.filepositions, time));
+					}
+					else if(keyframes.type=="mp4")
+					{
+						theKeyFrame = String(getMp4PosFromTime(time, keyframes.data));
+					}
+                	var bool:Boolean = currentStream.indexOf("?") != -1
+                	if(bool)
+                	{
+				    	stream.play(currentStream + "&start="+theKeyFrame )
+						trace(currentStream + "&start="+theKeyFrame)
+               	 	}
+                	else
+                	{
+						stream.play(currentStream + "?start=" + theKeyFrame)
+                	}
+				}
 				if ( status == Data.PAUSE)
 				{
 					stream.pause()
 				}
 			}
 		}
-		private function getPosFromTime(param1:Array, param2:Array, param3:Number) : Number
+		private function getFlvPosFromTime(param1:Array, param2:Array, param3:Number) : Number
         {
             var repos = param2[param2.length - 1];
             if (param3 <= param1[0])
@@ -715,7 +745,35 @@
             }
             return repos;
         }// end function
+        private function getMp4PosFromTime(second:Number, seekpoints:Object):Number
+  		{
+    		var index1 = 0;
+    		var index2 = 0;
+    		// Iterate through array to find keyframes before and after scrubber second
+    		for(var i = 0; i != seekpoints.length; i++)
+    		{
+      			if(seekpoints[i]["time"] < second)
+      			{
+        			index1 = i;
+      			}
+      			else
+      			{
+        			index2 = i;
+        			break;
+      			}
+			}
 
+    		// Calculate nearest keyframe
+    		if(second - seekpoints[index1]["time"] < seekpoints[index2]["time"] - second)
+    		{
+        		return index1;
+    		}
+    		else
+    		{
+        		return index2;
+    		}
+			return 0
+  		}
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		public function onMetaData(obj:Object):void
 		{
@@ -728,10 +786,22 @@
 				event.metaData = _metaData;
 				dispatchEvent(event);
 				//trace("a:"+_metaData.hasKeyframes)
-				/*for (var item in _metaData)
+				for (var item in _metaData)
 				{
-					trace(item+":"+_metaData[item])
-				}*/
+					//trace(item+":"+_metaData[item])
+					/*if(item=='keyframes')
+					{
+						trace(_metaData[item].times)
+					}*/
+					if(item=='seekpoints')
+					{
+						for(var xx in _metaData[item])
+						{
+							trace(xx+":"+_metaData[item][xx]["time"])
+							trace(xx+":"+_metaData[item][xx]["offset"])
+						}
+					}
+				}
 				//trace(_metaData.keyframes.times)
 				//trace(_metaData.keyframes.filepositions)
 				//trace(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions,15))
@@ -920,6 +990,27 @@
 		public function get currentStream():Object
 		{
 			return _stream
+		}
+		public function get keyframes():Object
+		{
+			var videoKeyFrames:Object=new Object()
+			
+			if(_metaData.keyframes != undefined)
+			{
+				videoKeyFrames.type='flv'
+				videoKeyFrames.data=_metaData.keyframes
+				
+			}
+			else if(_metaData.seekpoints != undefined)
+			{
+				videoKeyFrames.type='mp4'
+				videoKeyFrames.data=_metaData.seekpoints
+			}
+			return videoKeyFrames
+		}
+		public function get loadPer():Number
+		{
+			return _loadPer
 		}
 	}
 	

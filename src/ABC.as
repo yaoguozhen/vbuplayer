@@ -1,4 +1,4 @@
-package  
+﻿package  
 {
 	import data.Data;
 	import data.DispatchEvents;
@@ -516,7 +516,24 @@ package
 				_bufferEmptyStartTime = -1;
 				_loadingStartTime = getTimer();
 				_dragStartTime = getTimer();
-				_videoPlayer.seek(evn.per * _videoPlayer.totalTime / 1000);
+				var per:Number
+				if(_videoPlayer.keyframes == null)
+				{
+					if(evn.per>= _videoPlayer.loadPer)
+					{
+						per = _videoPlayer.loadPer;
+						_controlBarManager.playPer=per
+					}
+					else
+					{
+						per = evn.per;
+					}
+				}
+				else
+				{
+					per = evn.per;
+				}
+				_videoPlayer.seek(per * _videoPlayer.totalTime / 1000);
 			}
 		}
 		private function resumeSomePram():void

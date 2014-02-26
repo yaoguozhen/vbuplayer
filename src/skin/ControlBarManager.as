@@ -1,4 +1,4 @@
-package skin 
+﻿package skin 
 {
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -52,6 +52,7 @@ package skin
 		private var _lightIsOn:Boolean = true;
 		
 		private var _volNumBeforeClear:Number;
+		private var _loadPer:Number
 		
 		private var _isFullScreen:Boolean = false;
 		public var bigPlayBtnType:String=""//resume 被当做恢复播放按钮。connect被当做开始连接按钮
@@ -380,20 +381,12 @@ package skin
 		private function bigPlayBtnClickHandler(evn:Event)
 		{
 			_bigPlayBtn.visible = false;
+			loadPer=0;
 			dispatchEvent(new Event("bigPlayBtnClick"));
 		}
 		private function passClickedHandler(evn:Event):void
 		{
 			dispatchEvent(new Event("passClicked"))
-		}
-		private function pathClickHandler(evn:MouseEvent):void
-		{
-			if ((_controlBar.progressBar.path.mouseX / _controlBar.progressBar.width) < _controlBar.progressBar.loadingBar.scaleX)
-			{
-				playPer = _controlBar.progressBar.path.mouseX / _controlBar.progressBar.width;
-				
-				dispatchEvent(new Event("progressBarChange"));
-			}
 		}
 		private function volBtnClickHandler(evn:MouseEvent):void
 		{
@@ -583,6 +576,7 @@ package skin
 			
 			_controlBar.progressBar.progressBarBg2.width = _controlBar.volBtn.x - _controlBar.progressBar.x - 10;
 			_controlBar.progressBar.progressBarBg.width = _controlBar.progressBar.progressBarBg2.width-10;
+			
 			/*
 			    下面如果直接写
 			        path.width=XXXXXXXX
@@ -590,7 +584,7 @@ package skin
 				    path.mouseX属性不准确
 			*/
 			_controlBar.progressBar.path.getChildAt(0).width = _controlBar.progressBar.progressBarBg.width;
-
+            _controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*loadPer;
 			_ratePanel.x = _stage.stageWidth - _ratePanel.disRight;
 			_ratePanel.y = _controlBar.y - _ratePanel.height;
 			
@@ -729,7 +723,12 @@ package skin
 		//设置下载进度
 		public function set loadPer(n:Number):void
 		{
-			//_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*n;
+			_loadPer=n;
+			_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*_loadPer;
+		}
+		public function get loadPer():Number
+		{
+			return _loadPer
 		}
 		//设置播放进度
 		public function set playPer(n:Number):void

@@ -1,11 +1,10 @@
-package 
+﻿package 
 {
 	import com.greensock.events.LoaderEvent;
 	import data.DispatchEvents;
 	import data.Submit;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
-	//import data.VideoData;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -29,15 +28,11 @@ package
 		private var _skin:Skin;
 		private var _videoPlayer:AdvVideoPlayer;
 		private var _abc:ABC;
-		//private var _videoData:VideoData;
-		
+
 		public function Main():void 
 		{
 			try
 			{
-				//ExternalInterface.addCallback("v_start", v_start);
-				//ExternalInterface.addCallback("v_pause", v_pause);
-				//ExternalInterface.addCallback("v_resume", v_resume);
 				ExternalInterface.addCallback("v_pageClose", v_pageClose);
 			}
 			catch (err:Error)
@@ -51,7 +46,7 @@ package
 		private function init(e:Event = null):void 
 		{
 			YaoTrace.init(stage, "shibingdaxiang");
-			YaoTrace.add(YaoTrace.ALL, " 修改了暂停时，点击进度条，按钮状态不变的问题 ");
+			YaoTrace.add(YaoTrace.ALL, " 优化了拖动逻辑 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             
@@ -61,17 +56,13 @@ package
 			
 			DispatchEvents.init(this);
 			_videoPlayer = new AdvVideoPlayer();
-			/*
-			_videoData = new VideoData();
-			_videoData.addEventListener(Event.COMPLETE, videoDataLoadComHandler);
-			_videoData.addEventListener(IOErrorEvent.IO_ERROR, videoDataLoadErrHandler);
-			*/
+
 			var rezult = Data.getData(stage);
 			if (rezult)
 			{
 				initSkinLoader();
-				_skin.load(Data.skin+"?random="+Math.random());
-				//_skin.load(Data.skin);
+				//_skin.load(Data.skin+"?random="+Math.random());
+				_skin.load(Data.skin)
 			}
 			else
 			{
@@ -90,25 +81,6 @@ package
 				
 			}
 		}
-		/*
-		private function videoDataLoadComHandler(evn:Event):void
-		{
-			if (_videoData.analyseSuccess)
-			{
-				v_start(Data.streams, Data.fms);
-			}
-			else
-			{
-				YaoTrace.add(YaoTrace.ERROR, "视频信息格式不正确");
-				_abc.onVideoDateLoadError("获取视频信息出错")
-			}
-		}
-		private function videoDataLoadErrHandler(evn:IOErrorEvent):void
-		{
-			YaoTrace.add(YaoTrace.ERROR, "视频信息获取失败");
-			_abc.onVideoDateLoadError("获取视频信息出错")
-		}
-		*/
 		private function initSkinLoader():void
 		{
 			_skin = new Skin();
@@ -138,7 +110,6 @@ package
 				
 				_abc.alertMsg1 = " ";
 				v_start(Data.streams, Data.fms);
-				//_videoData.load(Data.vid);
 			}
 			else
 			{
@@ -175,20 +146,11 @@ package
 		
 		public function v_start(streams:Object,fms:String="",videoRatio=""):void
 		{
-			//Data.videoRatio=getVideoRatio(videoRatio);
 			if (Data.autoPlay)
 			{
 				_abc.play(streams, fms);
 				_abc.initRate();
 			}
-		}
-		public function v_pause():void
-		{
-			_abc.pause();
-		}
-		public function v_resume():void
-		{
-			_abc.resume();
 		}
 		public function v_pageClose():void
 		{
