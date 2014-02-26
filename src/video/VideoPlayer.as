@@ -76,7 +76,8 @@
 		private var _playCount:uint = 0;
 		private var _videoRatio:Number;
 		private var _lastByteLoaded:uint = 0
-		private var _loadPer:Number=0;
+		private var _loadPer:Number = 0;
+		private var _timeOnDrag:Number=0//只用于mp4
 		
 		public var bufferFullCount:uint = 0;//缓冲区满的次数
 		public var byteLoaded:uint = 0;
@@ -460,13 +461,12 @@
 		{
 			if (_netStream)
 			{
-				trace("当前时间："+_netStream.time)
-				if (_netStream.time > 1)
+				if (currentTime > 1)
 				{
-					if (_netStream.time * 1000 <= totalTime)
+					if (currentTime * 1000 <= totalTime)
 					{
 						var event:PlayingEvent = new PlayingEvent(PlayingEvent.PLAYING);
-						event.currentTime = _netStream.time * 1000;
+						event.currentTime = currentTime * 1000;
 						dispatchEvent(event);
 					}
 				}
@@ -697,20 +697,20 @@
 				{
 					_lastByteLoaded = 0;
 					var currentStream:String = getStream();
-					var theKeyFrame:String
+					var theKeyFrame:Number
 					if(keyframes.type=="flv")
 					{
-						theKeyFrame = String(getFlvPosFromTime(keyframes.data.times, keyframes.data.filepositions, time));
+						theKeyFrame = getFlvPosFromTime(keyframes.data.times, keyframes.data.filepositions, time);
 					}
 					else if(keyframes.type=="mp4")
 					{
-						theKeyFrame = String(getMp4PosFromTime(time, keyframes.data));
+						theKeyFrame = getMp4PosFromTime(time, keyframes.data);
+						_timeOnDrag = Number(theKeyFrame);
 					}
                 	var bool:Boolean = currentStream.indexOf("?") != -1
                 	if(bool)
                 	{
 				    	stream.play(currentStream + "&start="+theKeyFrame )
-						trace(currentStream + "&start="+theKeyFrame)
                	 	}
                 	else
                 	{
@@ -766,17 +766,18 @@
     		// Calculate nearest keyframe
     		if(second - seekpoints[index1]["time"] < seekpoints[index2]["time"] - second)
     		{
-        		return index1;
+        		return seekpoints[index1]["time"];
     		}
     		else
     		{
-        		return index2;
+        		return seekpoints[index2]["time"];
     		}
 			return 0
   		}
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		public function onMetaData(obj:Object):void
 		{
+			trace("时长："+obj.duration)
 			if (_totalTime == -1)
 			{
 				_metaData = obj;
@@ -786,13 +787,13 @@
 				event.metaData = _metaData;
 				dispatchEvent(event);
 				//trace("a:"+_metaData.hasKeyframes)
-				for (var item in _metaData)
+				/*for (var item in _metaData)
 				{
 					//trace(item+":"+_metaData[item])
-					/*if(item=='keyframes')
+					if(item=='keyframes')
 					{
 						trace(_metaData[item].times)
-					}*/
+					}
 					if(item=='seekpoints')
 					{
 						for(var xx in _metaData[item])
@@ -801,7 +802,7 @@
 							trace(xx+":"+_metaData[item][xx]["offset"])
 						}
 					}
-				}
+				}*/
 				//trace(_metaData.keyframes.times)
 				//trace(_metaData.keyframes.filepositions)
 				//trace(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions,15))
@@ -851,7 +852,7 @@
 		{
 			if (_netStream)
 			{
-			    _beforChangeRateTime = _netStream.time;
+			    _beforChangeRateTime = currentTime;
 				_videoCanAttachNetStream = false;
 			}
 			
@@ -949,7 +950,14 @@
 			{
 				if (_netStream)
 				{
-					return int(_netStream.time);
+				    if (keyframes.type == "flv")
+					{
+						return _netStream.time;
+					}
+					else if (keyframes.type == "mp4")
+					{
+						return _timeOnDrag + _netStream.time;
+					}
 				}
 				else 
 				{

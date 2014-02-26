@@ -33,6 +33,7 @@ package
 		private var _connecting:Boolean = false
 		private var _metaData:Object
 		private var _useFms:Boolean = true;
+		private var _playAfterMetaData:Boolean = false;
 		
 		public function VideoPreview():void 
 		{
@@ -131,7 +132,8 @@ package
 		private function onConnectSuccess():void
 		{
 			initStream(_netConnetction, _video, 1);
-			_netStream.play(_stream,_gotoTime);
+			_netStream.play(_stream)
+			_playAfterMetaData = true;
 		}
 		private function ncStatusHandler(evn:NetStatusEvent):void
 		{
@@ -210,14 +212,37 @@ package
 			}
 			else
 			{
-				if (_metaData)
+				if(keyframes.data == undefined)
 				{
-					var theKeyFrame:String = String(getPosFromTime(_metaData.keyframes.times, _metaData.keyframes.filepositions, time));
-					_netStream.play(_stream + "?start=" + theKeyFrame)
+					if (stream)
+					{
+						stream.seek(time);
+					}
+				}
+				else
+				{
+					var theKeyFrame:Number
+					if(keyframes.type=="flv")
+					{
+						theKeyFrame = getFlvPosFromTime(keyframes.data.times, keyframes.data.filepositions, time);
+					}
+					else if(keyframes.type=="mp4")
+					{
+						theKeyFrame = getMp4PosFromTime(time, keyframes.data);
+					}
+                	var bool:Boolean = _stream.indexOf("?") != -1
+                	if(bool)
+                	{
+				    	stream.play(_stream + "&start="+theKeyFrame )
+               	 	}
+                	else
+                	{
+						stream.play(_stream + "?start=" + theKeyFrame)
+                	}
 				}
 			}
 		}
-		private function getPosFromTime(param1:Array, param2:Array, param3:Number) : Number
+		private function getFlvPosFromTime(param1:Array, param2:Array, param3:Number) : Number
         {
             var repos = param2[param2.length - 1];
             if (param3 <= param1[0])
@@ -239,6 +264,35 @@ package
             }
             return repos;
         }// end function
+        private function getMp4PosFromTime(second:Number, seekpoints:Object):Number
+  		{
+    		var index1 = 0;
+    		var index2 = 0;
+    		// Iterate through array to find keyframes before and after scrubber second
+    		for(var i = 0; i != seekpoints.length; i++)
+    		{
+      			if(seekpoints[i]["time"] < second)
+      			{
+        			index1 = i;
+      			}
+      			else
+      			{
+        			index2 = i;
+        			break;
+      			}
+			}
+
+    		// Calculate nearest keyframe
+    		if(second - seekpoints[index1]["time"] < seekpoints[index2]["time"] - second)
+    		{
+        		return seekpoints[index1]["time"];
+    		}
+    		else
+    		{
+        		return seekpoints[index2]["time"];
+    		}
+			return 0
+  		}
 		public function onMetaData(obj:Object):void
 		{
 			if (_totalTime == -1)
@@ -246,6 +300,11 @@ package
 				_metaData = obj;
 				_totalTime = _metaData.duration;
 				scale(new Rectangle(0, 0, _container.width, _container.height), _metaData.width / _metaData.height)
+			}
+			if (_playAfterMetaData)
+			{
+				_playAfterMetaData = false;
+				gotoPlay(_totalTime * _path.mouseX / _path.width)
 			}
 		}
 		public function onPlayStatus(obj:Object):void{}
@@ -279,8 +338,29 @@ package
 				}
 			}
 		}
+		private function get keyframes():Object
+		{
+			var videoKeyFrames:Object=new Object()
+			
+			if (_metaData)
+			{
+				if(_metaData.keyframes != undefined)
+				{
+					videoKeyFrames.type='flv'
+					videoKeyFrames.data=_metaData.keyframes
+					
+				}
+				else if(_metaData.seekpoints != undefined)
+				{
+					videoKeyFrames.type='mp4'
+					videoKeyFrames.data=_metaData.seekpoints
+				}
+			}
+			return videoKeyFrames
+		}
 		public function clear():void
 		{
+			_playAfterMetaData = false;
 			_container.visible=false
 			_closeConnectionTimer.start()
 			_showVideoTimer.stop()
