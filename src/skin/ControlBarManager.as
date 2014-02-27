@@ -33,6 +33,7 @@
 		private var _brightnessBar:YaoSlider;//亮度
 		private var _contrastBar:YaoSlider;//对比度
 		private var _hideControlBarTime:Timer;
+		private var _hideSettingPanelTimer:Timer;
 		private var _videoPreview:VideoPreview;
 		
 		private var _isShow:Boolean = true;
@@ -65,6 +66,9 @@
 		{
 			_hideControlBarTime = new Timer(3000, 1);
 			_hideControlBarTime.addEventListener(TimerEvent.TIMER, timerHandler);
+			
+			_hideSettingPanelTimer = new Timer(300, 1);
+			_hideSettingPanelTimer.addEventListener(TimerEvent.TIMER, hideSettingPanelTimerHandler);
 		}
 		private function timerHandler(evn:TimerEvent):void
 		{
@@ -72,6 +76,10 @@
 			{
 				hide();
 			}
+		}
+		private function hideSettingPanelTimerHandler(evn:TimerEvent):void
+		{
+			_settingPanel.visible=false
 		}
 		private function init(s:Skin):void
 		{
@@ -116,6 +124,7 @@
 			
 			_controlBar.fullscreenBtn.addEventListener(MouseEvent.CLICK, fullscreenBtnClickHandler);
 			_controlBar.settingBtn.addEventListener(MouseEvent.CLICK, settingBtnClickHandler);
+			_controlBar.settingBtn.addEventListener(MouseEvent.ROLL_OVER, settingBtnRollOverHandler);
 			_controlBar.playBtn.addEventListener(MouseEvent.CLICK, playBtnClickHandler);
 			_controlBar.pauseBtn.addEventListener(MouseEvent.CLICK, pauseBtnClickHandler);
 			
@@ -146,6 +155,7 @@
 			activeRatePanelItem(_ratePanel.btn3, false);
 			
 			_settingPanel.visible = false;
+			_settingPanel.addEventListener(MouseEvent.ROLL_OVER,settingPanelRollOverHandler)
 			initSettingPanel()
 			
 			_ratePanel.btn1.value = "1"
@@ -216,7 +226,8 @@
 			_settingPanel.closeLight.buttonMode = true;
 			_settingPanel.openLight.addEventListener(MouseEvent.CLICK,settingPanelLightBtnClickHandler)
 			_settingPanel.closeLight.addEventListener(MouseEvent.CLICK,settingPanelLightBtnClickHandler)
-			_settingPanel.closeBtn.addEventListener(MouseEvent.CLICK, settingPanelCloseBtnClickHandler)
+			//_settingPanel.closeBtn.addEventListener(MouseEvent.CLICK, settingPanelCloseBtnClickHandler)
+			_settingPanel.defaultBtn.addEventListener(MouseEvent.CLICK, settingPanelDefaultBtnClickHandler)
 			
 			_brightnessBar = new YaoSlider()
 			_brightnessBar.init(_settingPanel.brightnessBar)
@@ -229,14 +240,14 @@
 			
 			_settingPanel.currentRateBtn = _settingPanel.rate0;
 		}
-		private function brightnessChangeHandler(evn:Event):void
+		private function brightnessChangeHandler(evn:Event=null):void
 		{
 			var event:ChangeLightEvent = new ChangeLightEvent(ChangeLightEvent.CHANGE);
 			event.changeType = "brightness"
 			event.value=_brightnessBar.currentPercent*510-255
 			dispatchEvent(event)
 		}
-		private function contrastChangeHandler(evn:Event):void
+		private function contrastChangeHandler(evn:Event=null):void
 		{
 			var event:ChangeLightEvent = new ChangeLightEvent(ChangeLightEvent.CHANGE);
 			event.changeType = "contrast"
@@ -290,9 +301,28 @@
 						break;
 				}
 		}
-		private function settingPanelCloseBtnClickHandler(evn:MouseEvent):void
+		/*private function settingPanelCloseBtnClickHandler(evn:MouseEvent):void
 		{
 			_settingPanel.visible=!_settingPanel.visible
+		}*/
+		private function settingPanelDefaultBtnClickHandler(evn:MouseEvent):void
+		{
+			//恢复视频比例
+			_settingPanel.rate0.gotoAndStop(2)
+			_settingPanel.rate43.gotoAndStop(1)
+			_settingPanel.rate169.gotoAndStop(1)
+			
+			_settingPanel.currentRateBtn = _settingPanel.rate0;
+			
+			var event:VideoAreaRateEvent = new VideoAreaRateEvent(VideoAreaRateEvent.RATE_CHANGE);
+			event.rate = "0";
+			dispatchEvent(event)
+			
+			//恢复色彩调节
+			_brightnessBar.currentPercent = 0.5
+			_contrastBar.currentPercent = 0.75
+			brightnessChangeHandler()
+			contrastChangeHandler()
 		}
 		private function recordInitNumber():void
 		{
@@ -348,11 +378,40 @@
 		}
 		private function settingBtnClickHandler(evn:MouseEvent ):void
 		{
+			if (_settingPanel.visible)
+			{
+				_hideSettingPanelTimer.stop()
+				_controlBar.settingBtn.removeEventListener(MouseEvent.ROLL_OUT, settingBtnRollOutHandler);
+			}
+			else
+			{
+				_controlBar.settingBtn.addEventListener(MouseEvent.ROLL_OUT, settingBtnRollOutHandler);
+			}
+			
 			_settingPanel.visible = !_settingPanel.visible
 			if (_ratePanel.visible)
 			{
 				_ratePanel.visible = false;
 			}
+		}
+		private function settingBtnRollOverHandler(evn:MouseEvent):void
+		{
+			_hideSettingPanelTimer.stop()
+		}
+		private function settingBtnRollOutHandler(evn:MouseEvent):void
+		{
+			_hideSettingPanelTimer.start()
+			_controlBar.settingBtn.removeEventListener(MouseEvent.ROLL_OUT, settingBtnRollOutHandler);
+		}
+		private function settingPanelRollOverHandler(evn:MouseEvent):void
+		{
+			_settingPanel.addEventListener(MouseEvent.ROLL_OUT, settingPanelRollOutHandler)
+			_hideSettingPanelTimer.stop()
+		}
+		private function settingPanelRollOutHandler(evn:MouseEvent):void
+		{
+			_settingPanel.removeEventListener(MouseEvent.ROLL_OUT, settingPanelRollOutHandler)
+			_hideSettingPanelTimer.start();
 		}
 		private function progressBarChangeHandler(evn:Event):void
 		{

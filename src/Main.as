@@ -46,7 +46,7 @@
 		private function init(e:Event = null):void 
 		{
 			YaoTrace.init(stage, "shibingdaxiang");
-			YaoTrace.add(YaoTrace.ALL, " 优化了拖动逻辑 ");
+			YaoTrace.add(YaoTrace.ALL, " 解决了关键帧的问题 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             
@@ -61,8 +61,8 @@
 			if (rezult)
 			{
 				initSkinLoader();
-				//_skin.load(Data.skin+"?random="+Math.random());
-				_skin.load(Data.skin)
+				_skin.load(Data.skin+"?random="+Math.random());
+				//_skin.load(Data.skin)
 			}
 			else
 			{

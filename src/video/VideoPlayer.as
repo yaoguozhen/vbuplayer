@@ -1007,7 +1007,6 @@
 			{
 				videoKeyFrames.type='flv'
 				videoKeyFrames.data=_metaData.keyframes
-				
 			}
 			else if(_metaData.seekpoints != undefined)
 			{
