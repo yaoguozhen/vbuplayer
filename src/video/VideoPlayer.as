@@ -719,7 +719,7 @@
 				}
 				if ( status == Data.PAUSE)
 				{
-					stream.pause()
+					_resume()
 				}
 			}
 		}
