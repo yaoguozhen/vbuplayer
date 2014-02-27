@@ -396,6 +396,7 @@
 		}
 		private function settingBtnRollOverHandler(evn:MouseEvent):void
 		{
+			_controlBar.settingBtn.addEventListener(MouseEvent.ROLL_OUT, settingBtnRollOutHandler);
 			_hideSettingPanelTimer.stop()
 		}
 		private function settingBtnRollOutHandler(evn:MouseEvent):void
