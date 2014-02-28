@@ -24,7 +24,7 @@
 		private var _maxValue:Number = 1;//最大值
 		private var _followBar:Sprite;
 		private var _canSetValue:Boolean = true;
-		
+		private var _dispatchOnSetValue:Boolean = false;
 		public function YaoSlider():void 
 		{
 			
@@ -163,6 +163,11 @@
 			{
 				_followBar.width = Math.abs(_block.x+_block.width/2 - _path.x);
 			}
+			if (_dispatchOnSetValue)
+			{
+				dispatchEvent(new Event(YaoSlider.CHANGE));
+				_dispatchOnSetValue = false;
+			}
 		}
 		
 		/*-------------------------------------------------------------------------------------------------------------------公共属性-------------------*/
@@ -240,8 +245,12 @@
 		{
 			return _respondPathClick;
 		}
+		public function set dispatchOnSetValue(b:Boolean):void
+		{
+			_dispatchOnSetValue = b;
+		}
 		public function set active(n:Number):void//-1 完全禁用；0 全部可用；1 不可拖动、不可点击path,但可以设置当前值
-		{			
+		{
 			switch(n)
 			{
 				case -1:

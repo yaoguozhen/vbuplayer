@@ -5,6 +5,7 @@
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
@@ -114,6 +115,7 @@
 			_controlBar.progressBar.loadingBar.width = 0;
 			
 			_stage.addEventListener(MouseEvent.MOUSE_MOVE, stageMouseMoveHandler123);
+			_stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDownHandler);
 			
 			_controlBar.volBtn.stop();
 			_controlBar.volBtn.buttonMode = true;
@@ -366,6 +368,52 @@
 					show();
 				}
 			}
+		}
+		private function stageKeyDownHandler(evn:KeyboardEvent):void
+		{
+			switch(evn.keyCode)
+			{
+				case 38://上
+					changeVol("big")
+					break
+				case 40://下
+					changeVol("small")
+					break
+				case 37://左
+					break
+				case 39://右
+					break
+				case 32://空格
+					break
+			}
+		}
+		private function changeVol(dir:String):void
+		{
+			var per:Number = _volBar.currentPercent;
+			if (dir == "big")
+			{
+				if (per < 1)
+				{
+					per += 0.1
+					if (per > 1)
+					{
+						per = 1;
+					}
+				}
+			}
+			else if (dir == "small")
+			{
+				if (per >0)
+				{
+					per -= 0.1
+					if (per < 0)
+					{
+						per = 0;
+					}
+				}
+			}
+			_volBar.dispatchOnSetValue = true;
+			_volBar.currentPercent = per;
 		}
 		private function playBtnClickHandler(evn:MouseEvent):void
 		{
@@ -790,7 +838,6 @@
 		//设置下载进度
 		public function set loadPer(n:Number):void
 		{
-			trace("loadper:"+n)
 			_loadPer=n;
 			_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*_loadPer;
 		}
@@ -801,7 +848,6 @@
 		//设置播放进度
 		public function set playPer(n:Number):void
 		{
-			trace("playper:"+n)
 			_progressBar.currentPercent = n;
 		}
 		//进度条当前值
