@@ -593,6 +593,7 @@
 			clearNetStream();
 			
 			_totalTime = -1;
+			_timeOnDrag = 0;
 			bufferFullCount = 0;
 			_firstOnStart = true;
 			_connectSuccess = false;

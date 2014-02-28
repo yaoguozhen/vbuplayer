@@ -506,7 +506,11 @@
 		{
 			if (_videoPlayer.status == "")
 			{
-				play(_videoPlayer.currentStream,_videoPlayer.currentFMS,evn.per * _videoPlayer.totalTime/1000)
+				_controlBarManager.loadPer = 0;
+				_controlBarManager.playPer = 0;
+				var cT:Number=evn.per * _videoPlayer.totalTime
+				_controlBarManager.setTime(cT,_videoPlayer.totalTime)
+				play(_videoPlayer.currentStream,_videoPlayer.currentFMS,cT/1000)
 			}
 			else
 			{
@@ -625,6 +629,7 @@
 					if (_isNewStartPlay)
 					{
 						_controlBarManager.playPer = 0;
+						_controlBarManager.setTime(0,0)
 					}
 					_controlBarManager.bigPlayBtnType = "resume";
 					play(Data.streams, Data.fms);

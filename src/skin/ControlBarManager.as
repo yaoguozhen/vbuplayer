@@ -56,7 +56,10 @@
 		private var _loadPer:Number
 		
 		private var _isFullScreen:Boolean = false;
-		public var bigPlayBtnType:String=""//resume 被当做恢复播放按钮。connect被当做开始连接按钮
+		private var _currentTime:Number;
+		private var _totalTime:Number;
+		public var bigPlayBtnType:String = ""//resume 被当做恢复播放按钮。connect被当做开始连接按钮
+		
 		
 		public function ControlBarManager() :void
 		{
@@ -659,6 +662,8 @@
 			_alertMsgBg.width = _stage.stageWidth;
 			_alertMsg.x = 10;
 			_alertMsg.y = _stage.stageHeight - _controlBar.controlBarBg.height - _alertMsg.height - 3;
+			
+			_setTime(_currentTime, _totalTime);
 		}
 		private function _setTime(currentTime:Number, totalTime:Number):void
 		{
@@ -697,7 +702,9 @@
 		//设置时间信息
 		public function setTime(currentTime:Number,totalTime:Number):void
 		{
-			_setTime(currentTime, totalTime);
+			_currentTime = currentTime;
+			_totalTime = totalTime;
+			_setTime(_currentTime, _totalTime);
 		}
 		//设置缓冲
 		public function setBuffering(show:Boolean,msg:String=""):void
@@ -783,6 +790,7 @@
 		//设置下载进度
 		public function set loadPer(n:Number):void
 		{
+			trace("loadper:"+n)
 			_loadPer=n;
 			_controlBar.progressBar.loadingBar.width = _controlBar.progressBar.progressBarBg.width*_loadPer;
 		}
@@ -793,6 +801,7 @@
 		//设置播放进度
 		public function set playPer(n:Number):void
 		{
+			trace("playper:"+n)
 			_progressBar.currentPercent = n;
 		}
 		//进度条当前值

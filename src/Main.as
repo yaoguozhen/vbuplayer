@@ -46,7 +46,7 @@
 		private function init(e:Event = null):void 
 		{
 			YaoTrace.init(stage, "shibingdaxiang");
-			YaoTrace.add(YaoTrace.ALL, " 解决了关键帧的问题 ");
+			YaoTrace.add(YaoTrace.ALL, " 修改了全屏后进度条不正常的问题 ");
 			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
             
